@@ -49,7 +49,7 @@ Each scenario maps to a user story in the spec. The e2e versions live in
       - the playhead highlight lasts the written length in every case.
 6. **Files and print (US4)**
    1. Export a melody that uses all three articulations, then import it. Expected: it is identical.
-   2. Import `tests/fixtures/*.v1.rcm.json`. Expected: it opens with plain notes.
+   2. Import `tests/fixtures/twinkle.rcm.json` (a v1 file). Expected: it opens with plain notes.
    3. In print preview, with and without fingerings, the marks and slurs match the screen,
       including a slur that crosses a line break.
    4. Export MIDI. Expected: staccato notes are half length.

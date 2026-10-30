@@ -155,8 +155,11 @@ settle how the spec maps onto the existing code.
 - **Decision**: `ClipboardNote` gains `mark?` and `slurNext?`.
   - Copying keeps the slur links between the copied notes only. The last copied note's link is
     cleared.
-  - `pasteNotes` creates notes with these fields, and then `reconcileSlurs` runs. Notes created by
-    a paste are exempt from the "successor was in the same run" rule.
+  - `pasteNotes` creates notes with these fields, then calls `reconcileSlurs` with the new ids as
+    `freshIds`.
+    - A pasted note keeps its link only if its successor is also a pasted note.
+    - An existing note whose successor is now a pasted note loses its link, so a paste into a slur
+      splits it (data-model.md § Slur reconciliation).
   - Move, resize and transpose spread `...n`, so marks are kept automatically.
   - Duplicating a melody copies the whole document.
 
