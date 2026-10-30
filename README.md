@@ -3,6 +3,10 @@
 A browser app for writing melodies for the soprano baroque recorder (C5–D7) and learning to play
 them. Runs entirely in the browser — no server, no account.
 
+**Try it: [sergeyvbo.github.io/RecorderComposer](https://sergeyvbo.github.io/RecorderComposer/)**
+
+![Recorder Composer: timeline, sheet music and fingering chart for Grieg's "Morning Mood", Russian UI](docs/screenshot.png)
+
 ## Features
 
 - **Timeline editor** — click to add notes, drag to move, drag edges to stretch, box/Ctrl/Shift
@@ -46,6 +50,9 @@ npm run check        # typecheck + lint + test
 ```
 
 Regenerate test fixtures with `node --experimental-strip-types scripts/make-fixtures.ts`.
+
+Every push to `master` is checked and deployed to GitHub Pages by
+[`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml).
 
 ## Architecture
 
