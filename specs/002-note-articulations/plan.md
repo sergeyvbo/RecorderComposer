@@ -17,6 +17,8 @@ This feature adds staccato and tenuto note marks and legato slurs to the existin
 - **Sound and export**: the domain playback schedule gains sounding length, tonguing and legato
   connection, which the Tone.js player maps to its calls. MIDI export shortens staccato notes.
 - **File format**: version 2, with a trivial migration from v1.
+- **Refusals**: every refused command, old or new, shows a short message in the existing edit hint
+  (FR-020).
 
 Decisions are in [research.md](./research.md).
 
@@ -125,12 +127,13 @@ src/
 │   ├── printLayout.ts       # per-system slur pieces
 │   ├── schedule.ts          # soundSec, tongued, connected, velocity
 │   └── midi.ts              # staccato half length
-├── state/store.ts           # copy keeps marks and internal slur links
+├── state/store.ts           # copy keeps marks and internal slur links; copy/cut/paste/undo/redo report refusals
 ├── audio/player.ts          # slurred notes: setNote, no breath; velocity; soundSec
 ├── i18n/{en,ru}.json        # articulation.* keys
 └── ui/
     ├── Toolbar/ArticulationControls.tsx   # NEW
-    ├── useShortcuts.ts      # S, T, L, Shift+L
+    ├── useShortcuts.ts      # S, T, L, Shift+L; report emptySelection instead of ignoring keys
+    ├── Toolbar/EditHint.tsx # show every refusal reason
     ├── Timeline/NoteRect.tsx, TimelinePanel.tsx   # markers, slur arcs, aria-label
     ├── Sheet/glyphs.ts, StaffRenderer.tsx         # artic glyphs, slur paths
     └── Print/PrintView.tsx  # pass system slur pieces, reserve vertical room

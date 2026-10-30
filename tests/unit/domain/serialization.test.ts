@@ -10,25 +10,46 @@ const mutate = (fn: (d: Doc) => void) => {
   fn(d);
   return parseMelodyFile(d);
 };
+const examplesOf = (path: string) => (JSON.parse(readFileSync(path, 'utf-8')) as { examples: unknown[] }).examples;
 const errorOf = (r: ReturnType<typeof parseMelodyFile>) => (r.ok ? 'ok' : r.error);
 
 describe('parseMelodyFile', () => {
-  it('accepts the example in contracts/melody-file.schema.json', () => {
-    const schema = JSON.parse(readFileSync('specs/001-recorder-composer/contracts/melody-file.schema.json', 'utf-8')) as { examples: unknown[] };
-    const r = parseMelodyFile(schema.examples[0]);
-    expect(r.ok).toBe(true);
+  it('accepts the example in contracts/melody-file.schema.json unchanged (v2)', () => {
+    const example = examplesOf('specs/002-note-articulations/contracts/melody-file.schema.json')[0] as Doc;
+    expect(parseMelodyFile(example)).toEqual({ ok: true, melody: example.melody });
   });
 
-  it('writes formatVersion 1', () => {
-    expect(valid()).toMatchObject({ format: 'recorder-composer', formatVersion: 1 });
-    expect(CURRENT_FORMAT_VERSION).toBe(1);
+  it('migrates the 001 v1 example', () => {
+    const r = parseMelodyFile(examplesOf('specs/001-recorder-composer/contracts/melody-file.schema.json')[0]);
+    expect(r).toMatchObject({ ok: true, migratedFrom: 1 });
+  });
+
+  it('writes formatVersion 2', () => {
+    expect(valid()).toMatchObject({ format: 'recorder-composer', formatVersion: 2 });
+    expect(CURRENT_FORMAT_VERSION).toBe(2);
+  });
+
+  it('parses marks and slur links unchanged', () => {
+    const d = valid();
+    d.melody.notes = [
+      { id: 'a', pitch: 72, start: 0, duration: Q, mark: 'staccato', slurNext: true },
+      { id: 'b', pitch: 74, start: Q, duration: Q, mark: 'tenuto' },
+    ];
+    expect(parseMelodyFile(d)).toEqual({ ok: true, melody: d.melody });
+  });
+
+  it.each(['twinkle', 'long-500', 'print-32-bars'])('migrates the v1 fixture %s to plain notes', (name) => {
+    const r = parseMelodyFile(readFileSync(`tests/fixtures/${name}.rcm.json`, 'utf-8'));
+    expect(r).toMatchObject({ ok: true, migratedFrom: 1 });
+    if (!r.ok) return;
+    expect(r.melody.notes.some((n) => 'mark' in n || 'slurNext' in n)).toBe(false);
   });
 
   it('reports notJson, wrongFormat and newerVersion', () => {
     expect(errorOf(parseMelodyFile('{nope'))).toBe('notJson');
     expect(errorOf(parseMelodyFile({ hello: 1 }))).toBe('wrongFormat');
     expect(errorOf(mutate((d) => ((d as { format: string }).format = 'other')))).toBe('wrongFormat');
-    expect(errorOf(mutate((d) => ((d as { formatVersion: number }).formatVersion = 2)))).toBe('newerVersion');
+    expect(errorOf(mutate((d) => ((d as { formatVersion: number }).formatVersion = 3)))).toBe('newerVersion');
   });
 
   it.each([
@@ -47,6 +68,10 @@ describe('parseMelodyFile', () => {
     ['extra property', (d: Doc) => ((d.melody as unknown as Record<string, unknown>).extra = 1)],
     ['overlapping notes', (d: Doc) => d.melody.notes.push({ id: 'b', pitch: 74, start: 240, duration: Q })],
     ['duplicate note ids', (d: Doc) => d.melody.notes.push({ id: 'a', pitch: 74, start: Q, duration: Q })],
+    ['unknown mark', (d: Doc) => ((d.melody.notes[0] as unknown as Record<string, unknown>).mark = 'accent')],
+    ['mark null', (d: Doc) => ((d.melody.notes[0] as unknown as Record<string, unknown>).mark = null)],
+    ['slurNext false', (d: Doc) => ((d.melody.notes[0] as unknown as Record<string, unknown>).slurNext = false)],
+    ['slurNext on the last note', (d: Doc) => (d.melody.notes[0]!.slurNext = true)],
   ])('rejects %s as invalid', (_name, fn) => {
     expect(errorOf(mutate(fn as (d: Doc) => void))).toBe('invalid');
   });

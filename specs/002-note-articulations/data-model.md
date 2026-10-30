@@ -38,7 +38,8 @@ deriveSlurs(m): { fromNoteId: string; toNoteId: string; noteIds: string[] }[]
 articulationState(m, ids) = {
   mark:        'staccato' | 'tenuto' | 'none' | 'mixed' | null,   // null = empty selection
   legatoApplied: boolean,   // setLegato(m, ids, true) would change nothing
-  canApplyLegato: boolean,  // false for an empty selection, or for the melody's last note alone
+  canApplyLegato: boolean,  // false for an empty selection, or for the melody's last note alone;
+                            // true for a selection with gaps, so the attempt can report notConsecutive
   canRemoveLegato: boolean, // some link would be cleared
 }
 ```
@@ -50,7 +51,7 @@ These commands are domain commands. Each `dispatch` is one undo step.
 | Command | Effect | Fails with |
 |---------|--------|------------|
 | `setMark(m, ids, 'staccato' \| 'tenuto' \| null)` | sets or clears `mark` on every listed note | `emptySelection` if no id exists; `invalidArgs` if nothing changes |
-| `setLegato(m, ids, true)` | sorts the listed notes by start. With ≥ 2 notes, sets `slurNext` on all but the last listed note. With 1 note, sets it on that note | `emptySelection`; `invalidArgs` if nothing changes, e.g. a single note that is the last note of the melody |
+| `setLegato(m, ids, true)` | sorts the listed notes by start. With ≥ 2 notes, sets `slurNext` on all but the last listed note. With 1 note, sets it on that note | `emptySelection`; `notConsecutive` if a note that is not listed lies between the first and the last listed note in start order (rests are not gaps); `invalidArgs` if nothing changes, e.g. a single note that is the last note of the melody |
 | `setLegato(m, ids, false)` | clears `slurNext` on the listed notes and on the note just before the first listed note | `emptySelection`; `invalidArgs` if nothing changes |
 
 ### Slur reconciliation
@@ -73,6 +74,9 @@ Consequences, as listed in the spec's edge cases:
 | Drag a note out of the run | The moved note's link is cleared. The run continues around the gap. |
 | Paste or add a note between two slurred notes | The earlier note's successor is now the fresh note, so its link is cleared and the run splits. |
 | Move a whole run together, transpose, change mark | No slur changes. |
+
+`RejectReason` gains `'notConsecutive'`. The UI shows it as a short transient message, like the
+existing edit refusals.
 
 ## Clipboard (extended)
 

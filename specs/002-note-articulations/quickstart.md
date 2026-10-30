@@ -35,6 +35,8 @@ Each scenario maps to a user story in the spec. The e2e versions live in
    3. Select note 3 and press `Shift+L`. Expected: there is no slur through note 3; notes 4–5 stay
       slurred.
    4. Select only the last note. Expected: the Legato button is disabled.
+   5. Select notes 1 and 3 only and press `L`. Expected: nothing changes, and a short message says
+      that legato needs consecutive notes.
 4. **Slurs survive edits (FR-012)**
    1. Slur notes 1–3 and delete note 2. Expected: the slur covers notes 1–3 again (the old notes 1
       and 3).
@@ -54,6 +56,12 @@ Each scenario maps to a user story in the spec. The e2e versions live in
       including a slur that crosses a line break.
    4. Export MIDI. Expected: staccato notes are half length.
 
+7. **Refusal messages (FR-020)**
+   1. With nothing selected, press `Delete`, then `S`. Expected: "Nothing selected" each time.
+   2. Open a new melody and press Ctrl/Cmd+Z. Expected: "Nothing to undo".
+   3. Press Ctrl/Cmd+V before copying anything. Expected: "The clipboard is empty".
+   4. Each message disappears after a few seconds.
+
 ## Automated checks
 
 | Area | Test |
@@ -63,5 +71,5 @@ Each scenario maps to a user story in the spec. The e2e versions live in
 | Notation | `tests/unit/domain/notation.test.ts`: `mark` on the first tied piece only; `slurs` list; print system splitting |
 | Schedule | `tests/unit/domain/schedule.test.ts`: soundSec, tongued, connected and velocity per R7; written `durationSec` unchanged |
 | MIDI | `tests/unit/domain/midi.test.ts`: staccato is half length |
-| UI | `tests/component/ArticulationControls.test.tsx` (buttons, aria-pressed/mixed, shortcuts) and `StaffRenderer` snapshot with marks and slurs |
+| UI | `tests/component/ArticulationControls.test.tsx` (buttons, aria-pressed/mixed, shortcuts, refusal message) and `tests/component/EditHint.test.tsx` (every refusal reason) |
 | E2E | `tests/e2e/us9-articulations.spec.ts`: scenarios 1, 3 and 6.1 plus axe checks |

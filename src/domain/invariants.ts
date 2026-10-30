@@ -20,6 +20,8 @@ export function checkInvariants(m: Melody): string[] {
     if (next) {
       if (next.start < n.start) errors.push(`notes not sorted at ${n.id}`);
       else if (n.start + n.duration > next.start) errors.push(`notes ${n.id} and ${next.id} overlap`);
+    } else if (n.slurNext) {
+      errors.push(`note ${n.id}: slurNext on last note`);
     }
   });
   return errors;

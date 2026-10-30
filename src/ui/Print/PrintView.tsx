@@ -52,6 +52,7 @@ export function PrintView({ mode }: { mode: PrintMode }) {
               bars={sys.bars}
               xOf={xOf}
               barLines={[]}
+              slurs={sys.slurs}
               barSpanX={(bar) => {
                 const k = sys.bars.indexOf(bar);
                 return [sys.barStartX[k] ?? 0, sys.barEndX[k] ?? 0];

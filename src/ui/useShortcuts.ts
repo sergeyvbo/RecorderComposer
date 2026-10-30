@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { articulationState, setLegato, setMark, toggledMark } from '@/domain/articulation';
 import { deleteNotes, moveNotes } from '@/domain/commands';
 import { useAppStore } from './storeContext';
 
@@ -32,8 +33,19 @@ export function useShortcuts(handlers: ShortcutHandlers = {}) {
       if ((key === ' ' || e.code === 'Space') && onPlayPause) return handled(), onPlayPause();
       if (key === 'Home' && onHome) return handled(), onHome();
       if (key === 'Escape') return actions.clearSelection();
-      if (ids.length === 0) return;
-      if (key === 'Delete' || key === 'Backspace') return handled(), actions.dispatch((m) => deleteNotes(m, ids));
+      const plain = !mod && !e.altKey;
+      const mark = plain ? ({ s: 'staccato', t: 'tenuto' } as const)[key] : undefined;
+      if (mark) {
+        handled();
+        if (ids.length === 0) return actions.notify('emptySelection');
+        const next = toggledMark(articulationState(melody, ids), mark);
+        return actions.dispatch((m) => setMark(m, ids, next));
+      }
+      if (plain && key === 'l') {
+        handled();
+        if (ids.length === 0) return actions.notify('emptySelection');
+        return actions.dispatch((m) => setLegato(m, ids, !e.shiftKey));
+      }
       const arrows: Record<string, [number, number]> = {
         ArrowUp: [0, e.shiftKey ? 12 : 1],
         ArrowDown: [0, e.shiftKey ? -12 : -1],
@@ -41,6 +53,11 @@ export function useShortcuts(handlers: ShortcutHandlers = {}) {
         ArrowRight: [prefs.snapTicks, 0],
       };
       const delta = arrows[key];
+      const actsOnSelection = key === 'Delete' || key === 'Backspace' || delta !== undefined;
+      if (!actsOnSelection) return;
+      // Refusals are always reported (FR-020), including an editing key with nothing selected.
+      if (ids.length === 0) return handled(), actions.notify('emptySelection');
+      if (key === 'Delete' || key === 'Backspace') return handled(), actions.dispatch((m) => deleteNotes(m, ids));
       if (delta) {
         handled();
         actions.dispatch((m) =>

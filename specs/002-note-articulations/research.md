@@ -52,18 +52,27 @@ settle how the spec maps onto the existing code.
   - `setLegato(m, ids, true)` sorts the selection by start time.
     - For two or more notes, it sets `slurNext` on every selected note except the last selected one.
     - For one note, it sets `slurNext` on that note, so it slurs to the next note.
+    - It fails with `notConsecutive` when a note that is not selected lies between the first and
+      the last selected note in start order. Rests are not gaps. The UI shows the refusal as a
+      short message in the existing edit hint.
     - It fails with `invalidArgs` when nothing would change, for example a single selected note that
       is the melody's last note.
   - `setLegato(m, ids, false)` clears `slurNext` on all selected notes and on the note just before
     the first selected one.
 
   The toolbar button shows `aria-pressed=true` when applying legato would change nothing, and
-  clicking it then removes legato. Keyboard: `L` applies legato, `Shift+L` removes it.
+  clicking it then removes legato. Keyboard: `L` applies legato, `Shift+L` removes it. A button
+  that is both pressed and disabled is styled differently from an enabled pressed button.
 - **Rationale**: Applying legato to a run that touches an existing slur merges with it
   automatically, because the links simply chain. Removing legato guarantees that no slur passes
   through a selected note.
-- **Alternatives considered**: A single toggle that guesses intent from a mixed selection is
-  ambiguous. Explicit apply and remove, with the toggle state derived from "apply is a no-op", is
+- **Alternatives considered**:
+  - A single toggle that guesses intent from a mixed selection is ambiguous.
+  - Filling the gaps of a selection with gaps (slurring the unselected notes too) would change
+    notes the user did not select, so the command refuses instead.
+  - Disabling Legato for a selection with gaps gives no reason; a refusal with a message does.
+
+  Explicit apply and remove, with the toggle state derived from "apply is a no-op", is
   predictable.
 
 ## R4. Staccato and tenuto commands
@@ -125,6 +134,7 @@ settle how the spec maps onto the existing code.
   | plain | written − 15 ms (unchanged) | velocity 0.85, breath chiff |
   | staccato | max(50% of written, 60 ms), capped at written − 15 ms | as plain or slurred |
   | tenuto | full written length | velocity 1.0 (slightly stronger) |
+  | slurred into the next note (not staccato) | full written length, so the next note joins without a gap | as plain, tenuto or slurred |
   | slurred, connected | previous note held, no release; pitch changes with `synth.setNote` at the start | no breath chiff |
   | slurred after a rest or a staccato note | new attack | no breath chiff |
 

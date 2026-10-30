@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { slurPieces } from '@/domain/printLayout';
 import { selectNotation } from '@/state/selectors';
 import { GUTTER, useTimeAxis } from '../Layout/SharedTimeAxis';
 import { useApp } from '../storeContext';
@@ -19,6 +20,7 @@ export function SheetPanel() {
   const height = staffHeight(SP);
   const margin = axis.width / axis.pxPerTick / 2;
   const bars = model.bars.filter((b) => b.endTick >= axis.visibleStart - margin && b.startTick <= axis.visibleEnd + margin);
+  const slurs = slurPieces(model, bars[0]?.startTick ?? 0, bars.at(-1)?.endTick ?? 0);
 
   const noteIdAt = (target: EventTarget | null) =>
     (target as Element | null)?.closest('[data-note-id]')?.getAttribute('data-note-id') ?? null;
@@ -52,6 +54,7 @@ export function SheetPanel() {
           selectedIds={selected}
           hoverId={hoverId}
           playingId={playingId}
+          slurs={slurs}
         />
       </svg>
     </div>

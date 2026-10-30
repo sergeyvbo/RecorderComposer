@@ -4,15 +4,28 @@ import { TIME_SIGNATURES, type Melody, type Note } from '@/domain/types';
 
 const grid = (min: number, max: number) => fc.integer({ min, max }).map((n) => n * 60);
 
-/** Valid notes: sorted, non-overlapping, on the 60-tick grid, in range. */
+/** Valid notes: sorted, non-overlapping, on the 60-tick grid, in range; optional marks and slur links. */
 export const notesArb: fc.Arbitrary<Note[]> = fc
-  .array(fc.record({ gap: grid(0, 16), duration: grid(1, 32), pitch: fc.integer({ min: 72, max: 98 }) }), { maxLength: 60 })
+  .array(
+    fc.record({
+      gap: grid(0, 16),
+      duration: grid(1, 32),
+      pitch: fc.integer({ min: 72, max: 98 }),
+      mark: fc.constantFrom(undefined, 'staccato' as const, 'tenuto' as const),
+      slurNext: fc.boolean(),
+    }),
+    { maxLength: 60 },
+  )
   .map((items) => {
     let t = 0;
     return items.map((it, i) => {
       const start = t + it.gap;
       t = start + it.duration;
-      return { id: `n${i}`, pitch: it.pitch, start, duration: it.duration };
+      const note: Note = { id: `n${i}`, pitch: it.pitch, start, duration: it.duration };
+      if (it.mark) note.mark = it.mark;
+      // Invariant 6: the last note never slurs onward.
+      if (it.slurNext && i < items.length - 1) note.slurNext = true;
+      return note;
     });
   });
 

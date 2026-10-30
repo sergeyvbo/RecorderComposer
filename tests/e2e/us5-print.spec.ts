@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 import { clickCell, openFresh } from './helpers';
 
@@ -59,3 +60,33 @@ for (const [paper, widthMm, heightMm] of [
     if (pdf) expect(pdf.byteLength).toBeGreaterThan(1000);
   });
 }
+
+// 002 quickstart scenario 6.3: articulations in print, including a slur across a system break.
+test('print shows marks in both modes and splits a slur at system breaks', async ({ page }) => {
+  await stubPrint(page);
+  await openFresh(page);
+  await page.getByTestId('import-input').setInputFiles('tests/fixtures/print-32-bars.rcm.json');
+  await expect(page.getByTestId('note').first()).toBeVisible();
+  await page.keyboard.press('ControlOrMeta+a');
+  await page.keyboard.press('s');
+  await page.keyboard.press('l');
+  // The timeline renders only the notes in view; print shows every note of the fixture.
+  const noteCount = (JSON.parse(readFileSync('tests/fixtures/print-32-bars.rcm.json', 'utf-8')) as { melody: { notes: unknown[] } })
+    .melody.notes.length;
+
+  for (const name of ['Print sheet music', 'Print with fingerings']) {
+    await page.getByRole('button', { name }).click();
+    const view = page.getByTestId('print-view');
+    await expect(view.getByTestId('artic-mark')).toHaveCount(noteCount);
+    const systems = await view.getByTestId('print-system').count();
+    expect(systems).toBeGreaterThan(1);
+    // One slur over the whole melody: one piece per system, open at every break.
+    const pieces = await view.getByTestId('slur').evaluateAll((els) =>
+      els.map((el) => [el.getAttribute('data-from') !== '', el.getAttribute('data-to') !== '']),
+    );
+    expect(pieces).toHaveLength(systems);
+    expect(pieces[0]).toEqual([true, false]);
+    expect(pieces.at(-1)).toEqual([false, true]);
+    expect(pieces.slice(1, -1).every(([from, to]) => !from && !to)).toBe(true);
+  }
+});

@@ -20,7 +20,13 @@ export interface Note {
   start: number;
   /** Ticks, ≥ GRID_MIN, multiple of GRID_MIN. */
   duration: number;
+  /** Absent = plain note. Never stored as `null` or `'none'` (002 data-model.md). */
+  mark?: NoteMark;
+  /** Slurred into the next note in start order. Absent = not slurred; never stored as `false`. */
+  slurNext?: true;
 }
+
+export type NoteMark = 'staccato' | 'tenuto';
 
 export type TimeSignature =
   | { beats: 2; beatUnit: 4 }
@@ -62,7 +68,7 @@ export const MAX_TITLE = 120;
 export const DEFAULT_TITLE = 'Untitled';
 
 export type AdjustReason = 'clampedToRange' | 'clampedToNeighbor' | 'shortenedToFit';
-export type RejectReason = 'noRoom' | 'outOfRange' | 'emptySelection' | 'invalidArgs';
+export type RejectReason = 'noRoom' | 'outOfRange' | 'emptySelection' | 'invalidArgs' | 'notConsecutive';
 
 export interface MoveDelta {
   dTicks: number;

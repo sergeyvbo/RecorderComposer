@@ -1,3 +1,4 @@
+import { readFileSync, writeFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
 import { openFresh } from './helpers';
 
@@ -21,6 +22,40 @@ test('edits on a 500-note melody render in under 100 ms', async ({ page }) => {
     for (let i = 0; i < 20; i++) {
       const t0 = performance.now();
       window.dispatchEvent(new KeyboardEvent('keydown', { key: i % 2 ? 'ArrowDown' : 'ArrowUp', bubbles: true }));
+      document.body.getBoundingClientRect(); // include style + layout of all panels
+      out.push(performance.now() - t0);
+      await new Promise((r) => setTimeout(r, 0));
+    }
+    return out;
+  });
+  expect(Math.max(...times)).toBeLessThan(100);
+});
+
+// 002 SC-003: articulation edits on an articulated 500-note melody (slurs in runs of 4) stay under 100 ms.
+test('articulation commands on an articulated 500-note melody render in under 100 ms', async ({ page }, info) => {
+  const doc = JSON.parse(readFileSync('tests/fixtures/long-500.rcm.json', 'utf-8')) as {
+    formatVersion: number;
+    melody: { notes: Record<string, unknown>[] };
+  };
+  doc.formatVersion = 2;
+  doc.melody.notes = doc.melody.notes.map((n, i) => ({
+    ...n,
+    mark: i % 2 ? 'staccato' : 'tenuto',
+    ...(i % 4 !== 3 && i < doc.melody.notes.length - 1 ? { slurNext: true } : {}),
+  }));
+  const file = info.outputPath('articulated-500.rcm.json');
+  writeFileSync(file, JSON.stringify(doc));
+
+  await openFresh(page);
+  await page.getByTestId('import-input').setInputFiles(file);
+  await expect(page.getByTestId('slur-arc').first()).toBeVisible();
+  await page.keyboard.press('ControlOrMeta+a');
+  const times = await page.evaluate(async () => {
+    const out: number[] = [];
+    for (let i = 0; i < 20; i++) {
+      const t0 = performance.now();
+      const key = ['s', 't', 'l', 'L'][i % 4] as string;
+      window.dispatchEvent(new KeyboardEvent('keydown', { key, shiftKey: key === 'L', bubbles: true }));
       document.body.getBoundingClientRect(); // include style + layout of all panels
       out.push(performance.now() - t0);
       await new Promise((r) => setTimeout(r, 0));

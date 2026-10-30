@@ -32,9 +32,12 @@ export interface PlaybackState {
   error: 'unavailable' | null;
 }
 
+/** Why a command was refused: a domain rejection or a store-level one (FR-020). */
+export type NoticeReason = RejectReason | 'clipboardEmpty' | 'nothingToUndo' | 'nothingToRedo';
+
 export interface LastEdit {
   adjusted: AdjustReason[];
-  reason: RejectReason | null;
+  reason: NoticeReason | null;
   seq: number;
 }
 
@@ -52,6 +55,8 @@ export interface AppActions {
   /** Run a command on the committed melody without touching history; result shown as `draft`. */
   preview: (command: (m: Melody) => EditResult) => EditResult;
   endPreview: () => void;
+  /** Report a refusal that did not come from a domain command (shown by EditHint). */
+  notify: (reason: NoticeReason) => void;
   undo: () => void;
   redo: () => void;
   select: (ids: readonly string[], mode?: SelectMode) => void;
@@ -106,7 +111,7 @@ export const selectCanRedo = (s: AppState) => canRedo(s.history);
 export function createAppStore(initialPrefs: Preferences, deps: StoreDeps = defaultDeps, initialMelody?: Melody) {
   const melody = initialMelody ?? createEmptyMelody(deps.now(), deps.newId());
   return createStore<AppState>()((set, get) => {
-    const noteRecord = (r: EditResult) =>
+    const noteRecord = (r: EditResult | { ok: false; reason: NoticeReason }) =>
       set((s) => ({
         lastEdit: {
           adjusted: r.ok ? (r.adjusted ?? []) : [],
@@ -163,8 +168,9 @@ export function createAppStore(initialPrefs: Preferences, deps: StoreDeps = defa
           return r;
         },
         endPreview: () => set({ draft: null }),
-        undo: () => stepHistory(undo(get().history)),
-        redo: () => stepHistory(redo(get().history)),
+        notify: (reason) => noteRecord({ ok: false, reason }),
+        undo: () => (canUndo(get().history) ? stepHistory(undo(get().history)) : get().actions.notify('nothingToUndo')),
+        redo: () => (canRedo(get().history) ? stepHistory(redo(get().history)) : get().actions.notify('nothingToRedo')),
         select: (ids, mode = 'replace') =>
           set((s) => {
             const next = mode === 'replace' ? new Set<string>() : new Set(s.selection.ids);
@@ -179,17 +185,29 @@ export function createAppStore(initialPrefs: Preferences, deps: StoreDeps = defa
           set((s) => (s.selection.hoverId === id ? s : { selection: { ...s.selection, hoverId: id } })),
         copy: () => {
           const { melody: m, selection } = get();
-          const sel = m.notes.filter((n) => selection.ids.has(n.id));
-          const first = sel[0]?.start ?? 0;
-          set({ clipboard: sel.map((n) => ({ pitch: n.pitch, offset: n.start - first, duration: n.duration })) });
+          const sel = m.notes.flatMap((n, i) => (selection.ids.has(n.id) ? [{ n, i }] : []));
+          if (sel.length === 0) return get().actions.notify('emptySelection');
+          const first = sel[0]?.n.start ?? 0;
+          set({
+            clipboard: sel.map(({ n, i }, k) => ({
+              pitch: n.pitch,
+              offset: n.start - first,
+              duration: n.duration,
+              ...(n.mark ? { mark: n.mark } : {}),
+              // Keep a slur link only to the next copied note, and only if it is the melody successor.
+              ...(n.slurNext && sel[k + 1]?.i === i + 1 ? { slurNext: true as const } : {}),
+            })),
+          });
         },
         cut: () => {
+          if (get().selection.ids.size === 0) return get().actions.notify('emptySelection');
           get().actions.copy();
           const ids = [...get().selection.ids];
           get().actions.dispatch((m) => deleteNotes(m, ids));
         },
         paste: (atTick) => {
           const { clipboard, prefs } = get();
+          if (clipboard.length === 0) return get().actions.notify('clipboardEmpty');
           const r = get().actions.dispatch((m) => pasteNotes(m, clipboard, atTick, prefs.snapTicks, deps));
           if (r.ok && r.ids) get().actions.select(r.ids);
         },

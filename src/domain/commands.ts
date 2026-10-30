@@ -1,4 +1,6 @@
+import { reconcileSlurs } from './articulation';
 import { isAllowedKey } from './keys';
+import { done, fail } from './result';
 import {
   GRID_MIN,
   MAX_PITCH,
@@ -14,6 +16,7 @@ import {
   type Melody,
   type MoveDelta,
   type Note,
+  type NoteMark,
   type SnapTicks,
   type TimeSignature,
 } from './types';
@@ -27,14 +30,17 @@ export interface ClipboardNote {
   /** Ticks after the first copied note's start. */
   offset: number;
   duration: number;
+  mark?: NoteMark;
+  /** Slurred into the next copied note (only between notes consecutive in the melody). */
+  slurNext?: true;
 }
 
-const fail = (reason: Extract<EditResult, { ok: false }>['reason']): EditResult => ({ ok: false, reason });
-
-function done(melody: Melody, adjusted: AdjustReason[], extra: Partial<Extract<EditResult, { ok: true }>> = {}): EditResult {
-  const unique = [...new Set(adjusted)];
-  return { ok: true, melody, ...(unique.length ? { adjusted: unique } : {}), ...extra };
-}
+/**
+ * Note-changing commands end here: slurs are reconciled against the melody before the edit
+ * (FR-012). `fresh` are the ids the command created.
+ */
+const keepSlurs = (prev: Melody, r: EditResult, fresh: readonly string[] = []): EditResult =>
+  r.ok ? { ...r, melody: reconcileSlurs(prev, r.melody, fresh) } : r;
 
 const sortNotes = (notes: Note[]): Note[] => [...notes].sort((a, b) => a.start - b.start);
 const withNotes = (m: Melody, notes: Note[]): Melody => ({ ...m, notes: sortNotes(notes) });
@@ -76,6 +82,15 @@ export function addNote(
   args: { pitch: number; start: number; duration: number; snap: SnapTicks },
   deps: CommandDeps,
 ): EditResult {
+  const r = insertNote(m, args, deps);
+  return keepSlurs(m, r, r.ok ? r.ids : []);
+}
+
+function insertNote(
+  m: Melody,
+  args: { pitch: number; start: number; duration: number; snap: SnapTicks },
+  deps: CommandDeps,
+): EditResult {
   const adjusted: AdjustReason[] = [];
   const pitch = clampPitch(args.pitch);
   if (pitch !== Math.round(args.pitch)) adjusted.push('clampedToRange');
@@ -91,6 +106,14 @@ export function addNote(
 }
 
 export function moveNotes(
+  m: Melody,
+  ids: readonly string[],
+  args: MoveDelta & { snap: SnapTicks; lastValid?: MoveDelta },
+): EditResult {
+  return keepSlurs(m, shiftNotes(m, ids, args));
+}
+
+function shiftNotes(
   m: Melody,
   ids: readonly string[],
   args: MoveDelta & { snap: SnapTicks; lastValid?: MoveDelta },
@@ -142,6 +165,14 @@ export function resizeNote(
   id: string,
   args: { edge: 'start' | 'end'; toTick: number; snap: SnapTicks },
 ): EditResult {
+  return keepSlurs(m, stretchNote(m, id, args));
+}
+
+function stretchNote(
+  m: Melody,
+  id: string,
+  args: { edge: 'start' | 'end'; toTick: number; snap: SnapTicks },
+): EditResult {
   const note = m.notes.find((n) => n.id === id);
   if (!note) return fail('emptySelection');
   const others = m.notes.filter((n) => n.id !== id);
@@ -173,7 +204,7 @@ export function deleteNotes(m: Melody, ids: readonly string[]): EditResult {
   const idSet = new Set(ids);
   const notes = m.notes.filter((n) => !idSet.has(n.id));
   if (notes.length === m.notes.length) return fail('emptySelection');
-  return done({ ...m, notes }, []);
+  return keepSlurs(m, done({ ...m, notes }, []));
 }
 
 export function pasteNotes(
@@ -189,13 +220,14 @@ export function pasteNotes(
   const adjusted: AdjustReason[] = [];
   const ids: string[] = [];
   for (const c of clipboard) {
-    const r = addNote(current, { pitch: c.pitch, start: base + c.offset, duration: c.duration, snap: GRID_MIN as SnapTicks }, deps);
+    const r = insertNote(current, { pitch: c.pitch, start: base + c.offset, duration: c.duration, snap: GRID_MIN as SnapTicks }, deps);
     if (!r.ok) return fail('noRoom');
-    current = r.melody;
+    const articulation = { ...(c.mark ? { mark: c.mark } : {}), ...(c.slurNext ? { slurNext: c.slurNext } : {}) };
+    current = { ...r.melody, notes: r.melody.notes.map((n) => (r.ids?.includes(n.id) ? { ...n, ...articulation } : n)) };
     adjusted.push(...(r.adjusted ?? []));
     ids.push(...(r.ids ?? []));
   }
-  return done(current, adjusted, { ids });
+  return keepSlurs(m, done(current, adjusted, { ids }), ids);
 }
 
 export function setTempo(m: Melody, bpm: number): EditResult {

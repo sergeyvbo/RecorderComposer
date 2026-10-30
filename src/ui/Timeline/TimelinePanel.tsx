@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { MAX_PITCH, type Note } from '@/domain/types';
 import { selectMelody } from '@/state/store';
 import { GUTTER, useTimeAxis } from '../Layout/SharedTimeAxis';
 import { useApp } from '../storeContext';
@@ -28,6 +29,16 @@ export function TimelinePanel() {
     (n) => n.start + n.duration >= axis.visibleStart - margin && n.start <= axis.visibleEnd + margin,
   );
   const hoverPitch = melody.notes.find((n) => n.id === hoverId)?.pitch ?? null;
+  // Slurred pairs with at least one note in view, joined from top centre to top centre (FR-009).
+  const visibleIds = new Set(visible.map((n) => n.id));
+  const slurPairs = melody.notes.flatMap((n, i) => {
+    const next = melody.notes[i + 1];
+    return n.slurNext && next && (visibleIds.has(n.id) || visibleIds.has(next.id)) ? [[n, next] as const] : [];
+  });
+  const topCentre = (n: Note) => [axis.tickToX(n.start + n.duration / 2), (MAX_PITCH - n.pitch) * ROW_HEIGHT] as const;
+  const articulationLabel = (n: Note) =>
+    [n.mark && t(`articulation.a11y.${n.mark}`), n.slurNext && t('articulation.a11y.slurred')].filter(Boolean).join(', ') ||
+    undefined;
 
   return (
     <div
@@ -63,8 +74,27 @@ export function TimelinePanel() {
               hovered={hoverId === n.id}
               playing={playingId === n.id}
               label={short(n.pitch)}
+              description={articulationLabel(n)}
             />
           ))}
+          {slurPairs.map(([a, b]) => {
+            const [x1, y1] = topCentre(a);
+            const [x2, y2] = topCentre(b);
+            const lift = Math.min(24, 6 + (x2 - x1) * 0.15);
+            return (
+              <path
+                key={`slur-${a.id}`}
+                data-testid="slur-arc"
+                d={`M${x1},${y1} Q${(x1 + x2) / 2},${Math.min(y1, y2) - lift} ${x2},${y2}`}
+                fill="none"
+                stroke="var(--fg)"
+                strokeWidth={1.5}
+                strokeLinecap="round"
+                aria-hidden
+                pointerEvents="none"
+              />
+            );
+          })}
           <BoxSelect box={box} />
         </svg>
       </div>

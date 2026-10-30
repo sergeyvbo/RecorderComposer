@@ -1,5 +1,5 @@
 import { openDB } from 'idb';
-import { parseMelodyFile, type MelodyFileV1, type ParseResult } from '@/domain/serialization';
+import { parseMelodyFile, type MelodyFileV2, type ParseResult } from '@/domain/serialization';
 import type { LibraryEntry } from '@/state/store';
 
 export const DB_NAME = 'recorder-composer';
@@ -9,7 +9,7 @@ const STORE = 'melodies';
 export interface MelodyDb {
   list: () => Promise<LibraryEntry[]>;
   get: (id: string) => Promise<ParseResult | null>;
-  put: (doc: MelodyFileV1) => Promise<void>;
+  put: (doc: MelodyFileV2) => Promise<void>;
   delete: (id: string) => Promise<void>;
 }
 
@@ -21,7 +21,7 @@ export async function openMelodyDb(name = DB_NAME): Promise<MelodyDb> {
   });
   return {
     list: async () => {
-      const docs = (await db.getAll(STORE)) as MelodyFileV1[];
+      const docs = (await db.getAll(STORE)) as MelodyFileV2[];
       return docs
         .map((d) => ({ id: d.melody.id, title: d.melody.title, updatedAt: d.melody.updatedAt }))
         .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));

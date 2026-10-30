@@ -1,6 +1,10 @@
 {
-  "app": { "title": "Recorder Composer" },
-  "melody": { "untitled": "Untitled melody" },
+  "app": {
+    "title": "Recorder Composer"
+  },
+  "melody": {
+    "untitled": "Untitled melody"
+  },
   "panel": {
     "timeline": "Timeline",
     "sheet": "Sheet music",
@@ -31,10 +35,24 @@
     "zoomIn": "Zoom in",
     "zoomOut": "Zoom out"
   },
-  "snap": { "480": "1/4", "240": "1/8", "120": "1/16", "60": "1/32" },
-  "naming": { "letter": "C D E", "solfege": "do re mi" },
-  "lang": { "en": "English", "ru": "Русский" },
-  "key": { "major": "{{tonic}} major", "minor": "{{tonic}} minor" },
+  "snap": {
+    "480": "1/4",
+    "240": "1/8",
+    "120": "1/16",
+    "60": "1/32"
+  },
+  "naming": {
+    "letter": "C D E",
+    "solfege": "do re mi"
+  },
+  "lang": {
+    "en": "English",
+    "ru": "Русский"
+  },
+  "key": {
+    "major": "{{tonic}} major",
+    "minor": "{{tonic}} minor"
+  },
   "edit": {
     "clampedToNeighbor": "Stopped at the neighbouring note",
     "shortenedToFit": "Shortened to fit the free space",
@@ -42,14 +60,31 @@
     "clampedToRange": "Limited to the recorder range (C5–D7)",
     "outOfRange": "Outside the recorder range",
     "emptySelection": "Nothing selected",
-    "invalidArgs": "This change is not possible"
+    "invalidArgs": "This change is not possible",
+    "notConsecutive": "Legato needs consecutive notes: the selection has gaps",
+    "clipboardEmpty": "The clipboard is empty",
+    "nothingToUndo": "Nothing to undo",
+    "nothingToRedo": "Nothing to redo"
+  },
+  "articulation": {
+    "group": "Articulation",
+    "staccato": "Staccato (S)",
+    "tenuto": "Tenuto (T)",
+    "legato": "Legato (L, Shift+L to remove)",
+    "a11y": {
+      "staccato": "staccato",
+      "tenuto": "tenuto",
+      "slurred": "slurred to next"
+    }
   },
   "playback": {
     "empty": "Add notes to play the melody",
     "ruler": "Time ruler — click to move the playback position",
     "position": "Playback position"
   },
-  "audio": { "unavailable": "Sound could not be started in this browser" },
+  "audio": {
+    "unavailable": "Sound could not be started in this browser"
+  },
   "transpose": {
     "title": "Transpose",
     "byKey": "To key",
@@ -93,7 +128,9 @@
     "updated": "Changed {{date}}",
     "renamePrompt": "New title"
   },
-  "export": { "emptyMidi": "Add notes before exporting MIDI" },
+  "export": {
+    "emptyMidi": "Add notes before exporting MIDI"
+  },
   "print": {
     "empty": "Add notes before printing",
     "tempo": "♩ = {{bpm}}"
@@ -118,5 +155,8 @@
       "scientific": "{{name}}{{octave}}"
     }
   },
-  "dialog": { "ok": "OK", "cancel": "Cancel" }
+  "dialog": {
+    "ok": "OK",
+    "cancel": "Cancel"
+  }
 }

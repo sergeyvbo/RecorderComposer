@@ -1,8 +1,9 @@
-import { fireEvent, screen } from '@testing-library/react';
+import { act, fireEvent, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_PX_PER_TICK } from '@/state/prefs';
 import { ROW_HEIGHT, TimelinePanel } from '@/ui/Timeline/TimelinePanel';
 import { useShortcuts } from '@/ui/useShortcuts';
+import { melodyWith } from '../unit/domain/helpers';
 import { setup } from './renderApp';
 
 function Shortcuts() {
@@ -52,5 +53,26 @@ describe('Timeline (US1 primary flow)', () => {
     expect(store.getState().melody.notes.map((n) => n.pitch)).toEqual([83]);
     expect(store.getState().draft).toBeNull();
     expect(store.getState().history.past.length).toBe(pastBefore + 1);
+  });
+});
+
+describe('Timeline articulation (002 FR-009, FR-019)', () => {
+  it('shows marks, joins slurred notes with an arc and names both in the accessible label', () => {
+    const { store } = setup(<TimelinePanel />);
+    act(() =>
+      store.getState().actions.openMelody(
+        melodyWith([
+          { id: 'a', pitch: 79, start: 0, duration: 480, mark: 'staccato', slurNext: true },
+          { id: 'b', pitch: 81, start: 480, duration: 480, mark: 'tenuto' },
+          { id: 'c', pitch: 83, start: 960, duration: 480 },
+        ]),
+      ),
+    );
+    expect(screen.getAllByTestId('timeline-mark').map((el) => el.getAttribute('data-mark'))).toEqual(['staccato', 'tenuto']);
+    expect(screen.getAllByTestId('slur-arc')).toHaveLength(1);
+    const labels = screen.getAllByTestId('note').map((el) => el.getAttribute('aria-label'));
+    expect(labels[0]).toMatch(/, staccato, slurred to next$/);
+    expect(labels[1]).toMatch(/, tenuto$/);
+    expect(labels[2]).not.toMatch(/,/);
   });
 });

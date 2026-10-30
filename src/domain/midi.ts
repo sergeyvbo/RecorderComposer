@@ -31,7 +31,11 @@ export function toMidiBytes(m: Melody): Uint8Array {
   const track = midi.addTrack();
   track.name = m.title;
   track.instrument.number = RECORDER_PROGRAM;
-  for (const n of m.notes) track.addNote({ midi: n.pitch, ticks: n.start, durationTicks: n.duration, velocity: 0.8 });
+  for (const n of m.notes) {
+    // MIDI has no articulation events: staccato is written short; slurs and tenuto stay full length (002 R10).
+    const durationTicks = n.mark === 'staccato' ? Math.max(30, Math.floor(n.duration / 2)) : n.duration;
+    track.addNote({ midi: n.pitch, ticks: n.start, durationTicks, velocity: 0.8 });
+  }
   if (midi.header.ppq !== PPQ) throw new Error(`unexpected PPQ ${midi.header.ppq}`);
   return patchKeySignature(midi.toArray(), keyFifths(m.key), m.key.mode === 'minor');
 }

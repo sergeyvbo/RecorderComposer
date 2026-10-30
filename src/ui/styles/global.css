@@ -149,6 +149,33 @@ button:disabled {
   color: var(--accent-fg);
 }
 
+/* Some but not all selected notes have this state. */
+.toggle[aria-pressed='mixed'] {
+  border-color: var(--accent);
+  background: linear-gradient(135deg, var(--accent) 0 50%, var(--panel) 50% 100%);
+}
+
+/* Pressed but unavailable: outline only, so it does not read as an active, clickable toggle. */
+.toggle[aria-pressed='true']:disabled {
+  background: var(--panel);
+  color: var(--fg);
+  border: 1px dashed var(--accent);
+  opacity: 0.6;
+}
+
+.artic-button {
+  min-width: 34px;
+}
+
+.artic-glyph {
+  font-family: Bravura, serif;
+  font-size: 22px;
+  line-height: 1;
+  display: inline-block;
+  height: 16px;
+  overflow: visible;
+}
+
 .workspace {
   flex: 1;
   min-height: 0;

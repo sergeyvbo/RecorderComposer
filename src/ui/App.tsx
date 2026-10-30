@@ -8,6 +8,7 @@ import { SheetPanel } from './Sheet/SheetPanel';
 import { TimelinePanel } from './Timeline/TimelinePanel';
 import { FileActions } from './Library/FileActions';
 import { SaveStatus, StorageBanner } from './StorageBanner';
+import { ArticulationControls } from './Toolbar/ArticulationControls';
 import { EditControls } from './Toolbar/EditControls';
 import { EditHint } from './Toolbar/EditHint';
 import { KeyControls } from './Toolbar/KeyControls';
@@ -30,6 +31,7 @@ export function App() {
         </div>
         <TransportControls />
         <EditControls />
+        <ArticulationControls />
         <KeyControls />
         <FileActions />
         <PrintMenu />

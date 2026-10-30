@@ -1,10 +1,11 @@
 import { memo, type ReactNode } from 'react';
 import type { KeySignature } from '@/domain/keys';
 import type { NotationBar, NotationEvent } from '@/domain/notation';
-import { preludeSpaces } from '@/domain/printLayout';
+import { preludeSpaces, type SlurPiece } from '@/domain/printLayout';
 import type { TimeSignature } from '@/domain/types';
 import {
   accidentalGlyph,
+  articGlyph,
   FLAG_DOWN,
   FLAG_UP,
   FLAT_STEPS,
@@ -26,9 +27,12 @@ export interface StaffGeometry {
 /** y of a staff step (E4 bottom line = 0, each step half a space). */
 export const stepY = (g: StaffGeometry, step: number) => g.top + 4 * g.sp - (step * g.sp) / 2;
 
-/** Height needed for the treble staff over the C4–D6 written range plus stems and beams. */
-export const staffHeight = (sp: number) => 15 * sp;
-export const staffTop = (sp: number) => 6 * sp;
+/**
+ * Height needed for the treble staff over the C4–D6 written range plus stems and beams, with one
+ * extra space above and below for articulation marks on the extreme notes (002 FR-008).
+ */
+export const staffHeight = (sp: number) => 17 * sp;
+export const staffTop = (sp: number) => 7 * sp;
 
 const font = (sp: number) => ({ fontFamily: 'Bravura', fontSize: 4 * sp });
 
@@ -108,9 +112,24 @@ export interface StaffNotesProps {
   playingId?: string | null;
   /** Centre whole-bar rests between these x positions per bar index. */
   barSpanX?: (bar: NotationBar) => [number, number];
+  /** Slurs on this staff; a `null` end runs to the staff edge (002 FR-008). */
+  slurs?: readonly SlurPiece[];
 }
 
 const NOTE_PAD = 0.3;
+
+/**
+ * Staff step of an articulation mark: one staff space from the notehead on the side opposite the
+ * stem, moved out to the next space when it would sit on a staff line (R5).
+ */
+export function markStep(step: number, above: boolean): number {
+  const dir = above ? 1 : -1;
+  const s = step + 2 * dir;
+  return s >= 0 && s <= 8 && s % 2 === 0 ? s + dir : s;
+}
+
+/** Baseline offset (in spaces) that centres a SMuFL articulation glyph on its step. */
+const MARK_BASELINE = { staccato: 0.2, tenuto: 0.07 } as const;
 
 /** Draws notes, rests, accidentals, dots, ledger lines, stems, flags, beams, ties and bar lines. */
 export const StaffNotes = memo(function StaffNotes({
@@ -122,6 +141,7 @@ export const StaffNotes = memo(function StaffNotes({
   hoverId,
   playingId,
   barSpanX,
+  slurs,
 }: StaffNotesProps) {
   const sp = g.sp;
   const events = bars.flatMap((b) => b.events);
@@ -221,6 +241,24 @@ export const StaffNotes = memo(function StaffNotes({
         </text>,
       );
     }
+    if (e.mark) {
+      const above = !p.up;
+      const y = stepY(g, markStep(step, above)) + (above ? 1 : -1) * MARK_BASELINE[e.mark] * sp;
+      parts.push(
+        <text
+          key="mark"
+          data-testid="artic-mark"
+          data-mark={e.mark}
+          x={p.x + p.headW / 2}
+          y={y}
+          textAnchor="middle"
+          style={font(sp)}
+          fill={fill}
+        >
+          {articGlyph(e.mark, above)}
+        </text>,
+      );
+    }
     if (e.value >= 2) {
       const sx = stemX(p);
       const end = e.beamGroup !== null ? (beamY.get(e.beamGroup) as number) : p.up ? p.y - METRICS.stemLength * sp : p.y + METRICS.stemLength * sp;
@@ -272,6 +310,55 @@ export const StaffNotes = memo(function StaffNotes({
       </g>,
     );
   });
+
+  // Slurs (R5): a filled crescent from the first piece of the first note to the last piece of the
+  // last note; below the heads when every stem in the run points up, otherwise above.
+  for (const [k, slur] of (slurs ?? []).entries()) {
+    const fromIdx = slur.fromNoteId === null ? 0 : placed.findIndex((p) => p.e.noteId === slur.fromNoteId);
+    const toIdx = slur.toNoteId === null ? placed.length - 1 : placed.map((p) => p.e.noteId).lastIndexOf(slur.toNoteId);
+    if (fromIdx < 0 || toIdx < 0 || toIdx < fromIdx) continue;
+    const run = placed.slice(fromIdx, toIdx + 1);
+    const first = run[0] as Placed;
+    const last = run.at(-1) as Placed;
+    const dir = run.every((p) => p.up) ? 1 : -1;
+    // Each end sits a space beyond its notehead, and a space further when a mark is on that side.
+    const markOnSide = (p: Placed) => {
+      const head = placed.find((q) => q.e.noteId === p.e.noteId);
+      return !!head?.e.mark && (dir > 0) === head.up;
+    };
+    const endY = (p: Placed) => p.y + dir * (1.1 + (markOnSide(p) ? 1 : 0)) * sp;
+    // Open ends run to the staff edges: bar spans when given (print), else the time axis.
+    const firstBar = bars[0];
+    const lastBar = bars.at(-1);
+    const left = firstBar ? (barSpanX ? barSpanX(firstBar)[0] : xOf(firstBar.startTick)) : first.x;
+    const right = lastBar ? (barSpanX ? barSpanX(lastBar)[1] : xOf(lastBar.endTick)) : last.x + last.headW;
+    const x1 = slur.fromNoteId === null ? left : first.x + first.headW / 2;
+    const x2 = slur.toNoteId === null ? right - 0.5 * sp : last.x + last.headW / 2;
+    // An open end (system break) sits clear of every notehead and mark in the run.
+    const clear = run.map(endY).reduce((a, b) => (dir > 0 ? Math.max(a, b) : Math.min(a, b)));
+    const y1 = slur.fromNoteId === null ? clear : endY(first);
+    const y2 = slur.toNoteId === null ? clear : endY(last);
+    // Clear every notehead in between, then arch by a fraction of the length.
+    const extreme = run.reduce((acc, p) => (dir > 0 ? Math.max(acc, p.y + sp) : Math.min(acc, p.y - sp)), dir > 0 ? Math.max(y1, y2) : Math.min(y1, y2));
+    const arch = Math.min(2 * sp, Math.max(0.8 * sp, (x2 - x1) * 0.08));
+    const peak = extreme + dir * arch;
+    const cy = 2 * peak - (y1 + y2) / 2;
+    const thick = 0.45 * sp;
+    const cx = (x1 + x2) / 2;
+    out.push(
+      <path
+        key={`slur${k}`}
+        data-testid="slur"
+        data-from={slur.fromNoteId ?? ''}
+        data-to={slur.toNoteId ?? ''}
+        d={`M${x1},${y1} Q${cx},${cy} ${x2},${y2} Q${cx},${cy - dir * thick} ${x1},${y1} Z`}
+        fill="var(--fg)"
+        stroke="var(--fg)"
+        strokeWidth={0.1 * sp}
+        pointerEvents="none"
+      />,
+    );
+  }
 
   return <g className="staff-notes">{out}</g>;
 });

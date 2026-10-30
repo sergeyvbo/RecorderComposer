@@ -133,3 +133,50 @@ describe('layoutNotation — beaming', () => {
     expect(first).toMatchObject({ beamGroup: null, noteId: 'x1', startTick: 0 });
   });
 });
+
+describe('layoutNotation — articulation marks (002 FR-008)', () => {
+  it('copies the mark onto the note event', () => {
+    const m = melodyWith([
+      { id: 'a', pitch: 72, start: 0, duration: Q, mark: 'staccato' },
+      { id: 'b', pitch: 74, start: Q, duration: Q, mark: 'tenuto' },
+      { id: 'c', pitch: 76, start: 2 * Q, duration: Q },
+    ]);
+    const notes = layoutNotation(m).bars[0]!.events.filter((e) => e.kind === 'note');
+    expect(notes.map((e) => e.mark)).toEqual(['staccato', 'tenuto', undefined]);
+    expect('mark' in notes[2]!).toBe(false);
+  });
+
+  it('puts the mark on the first tied piece only', () => {
+    // A half note starting on beat 2 of 4/4 is written as two tied quarters… and across a bar line.
+    const m = melodyWith([{ id: 'a', pitch: 72, start: 3 * Q, duration: H, mark: 'tenuto' }]);
+    const pieces = layoutNotation(m).bars.flatMap((b) => b.events).filter((e) => e.kind === 'note');
+    expect(pieces).toHaveLength(2);
+    expect(pieces.map((e) => e.mark)).toEqual(['tenuto', undefined]);
+  });
+
+  it('never puts a mark on a rest', () => {
+    const m = melodyWith([{ id: 'a', pitch: 72, start: Q, duration: Q, mark: 'staccato' }]);
+    const rests = layoutNotation(m).bars[0]!.events.filter((e) => e.kind === 'rest');
+    expect(rests.every((e) => e.mark === undefined)).toBe(true);
+  });
+});
+
+describe('layoutNotation — slurs (002 FR-003, FR-008)', () => {
+  it('lists each slurred run as { fromNoteId, toNoteId }', () => {
+    const m = melodyWith([
+      { id: 'a', pitch: 72, start: 0, duration: Q, slurNext: true },
+      { id: 'b', pitch: 74, start: Q, duration: Q, slurNext: true },
+      { id: 'c', pitch: 76, start: 2 * Q, duration: Q },
+      { id: 'd', pitch: 77, start: 3 * Q, duration: Q, slurNext: true },
+      { id: 'e', pitch: 79, start: 5 * Q, duration: Q },
+    ]);
+    expect(layoutNotation(m).slurs).toEqual([
+      { fromNoteId: 'a', toNoteId: 'c' },
+      { fromNoteId: 'd', toNoteId: 'e' },
+    ]);
+  });
+
+  it('has no slurs without links', () => {
+    expect(layoutNotation(melodyWith([{ pitch: 72, start: 0, duration: Q }])).slurs).toEqual([]);
+  });
+});

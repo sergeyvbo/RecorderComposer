@@ -3,15 +3,17 @@ import { checkInvariants } from './invariants';
 import { MAX_PITCH, MAX_TEMPO, MAX_TITLE, MIN_PITCH, MIN_TEMPO, type Melody } from './types';
 
 export const FORMAT_ID = 'recorder-composer';
-export const CURRENT_FORMAT_VERSION = 1;
+export const CURRENT_FORMAT_VERSION = 2;
 
-/** Mirrors specs/001-recorder-composer/contracts/melody-file.schema.json (v1). */
+/** Mirrors specs/002-note-articulations/contracts/melody-file.schema.json (v2). */
 const noteSchema = z
   .object({
     id: z.string().min(1).max(64),
     pitch: z.number().int().min(MIN_PITCH).max(MAX_PITCH),
     start: z.number().int().min(0).multipleOf(60),
     duration: z.number().int().min(60).multipleOf(60),
+    mark: z.enum(['staccato', 'tenuto']).optional(),
+    slurNext: z.literal(true).optional(),
   })
   .strict();
 
@@ -40,22 +42,25 @@ const melodySchema = z
   })
   .strict();
 
-const fileSchemaV1 = z
-  .object({ format: z.literal(FORMAT_ID), formatVersion: z.literal(1), melody: melodySchema })
+const fileSchemaV2 = z
+  .object({ format: z.literal(FORMAT_ID), formatVersion: z.literal(2), melody: melodySchema })
   .strict();
 
-export type MelodyFileV1 = { format: typeof FORMAT_ID; formatVersion: 1; melody: Melody };
+export type MelodyFileV2 = { format: typeof FORMAT_ID; formatVersion: 2; melody: Melody };
 
-/** formatVersion n → n + 1. Empty while only v1 exists (Principle V). */
-const MIGRATIONS: Record<number, (doc: Record<string, unknown>) => Record<string, unknown>> = {};
+/** formatVersion n → n + 1 (Principle V). */
+const MIGRATIONS: Record<number, (doc: Record<string, unknown>) => Record<string, unknown>> = {
+  // v1 notes are valid v2 plain, unslurred notes.
+  1: (doc) => ({ ...doc, formatVersion: 2 }),
+};
 
 export type ParseError = 'notJson' | 'wrongFormat' | 'newerVersion' | 'invalid';
 export type ParseResult =
   | { ok: true; melody: Melody; migratedFrom?: number }
   | { ok: false; error: ParseError; details?: string };
 
-export function serialize(m: Melody): MelodyFileV1 {
-  return { format: FORMAT_ID, formatVersion: 1, melody: m };
+export function serialize(m: Melody): MelodyFileV2 {
+  return { format: FORMAT_ID, formatVersion: 2, melody: m };
 }
 
 /** Parse an exported file (text or already-parsed JSON) or a stored document. */
@@ -82,7 +87,7 @@ export function parseMelodyFile(input: unknown): ParseResult {
     if (!migrate) return { ok: false, error: 'invalid', details: `no migration from ${v}` };
     doc = migrate(doc);
   }
-  const parsed = fileSchemaV1.safeParse(doc);
+  const parsed = fileSchemaV2.safeParse(doc);
   if (!parsed.success) {
     return { ok: false, error: 'invalid', details: parsed.error.issues[0]?.message ?? 'schema' };
   }

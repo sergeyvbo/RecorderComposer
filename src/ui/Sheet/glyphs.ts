@@ -1,4 +1,5 @@
 import type { NoteValue } from '@/domain/notation';
+import type { NoteMark } from '@/domain/types';
 
 /** SMuFL code points (Bravura). One staff space = 0.25 em. */
 export const GLYPH = {
@@ -16,6 +17,10 @@ export const GLYPH = {
   rest8th: '',
   rest16th: '',
   rest32nd: '',
+  articStaccatoAbove: '',
+  articStaccatoBelow: '',
+  articTenutoAbove: '',
+  articTenutoBelow: '',
 } as const;
 
 export const FLAG_UP: Partial<Record<NoteValue, string>> = { 8: '', 16: '', 32: '' };
@@ -35,6 +40,16 @@ export const notehead = (v: NoteValue) =>
 
 export const accidentalGlyph = (a: -1 | 0 | 1) =>
   a === 1 ? GLYPH.accidentalSharp : a === -1 ? GLYPH.accidentalFlat : GLYPH.accidentalNatural;
+
+/** Articulation mark glyph; `above` places it above the notehead (stem down). */
+export const articGlyph = (mark: NoteMark, above: boolean) =>
+  mark === 'staccato'
+    ? above
+      ? GLYPH.articStaccatoAbove
+      : GLYPH.articStaccatoBelow
+    : above
+      ? GLYPH.articTenutoAbove
+      : GLYPH.articTenutoBelow;
 
 export const timeSigDigits = (n: number) =>
   [...String(n)].map((d) => String.fromCodePoint(0xe080 + Number(d))).join('');

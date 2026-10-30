@@ -72,6 +72,9 @@ disappears.
 6. **Given** a selected note that is the last note of the melody, **When** the user applies
    legato to it alone, **Then** nothing changes and the command is unavailable (there is no
    next note to slur to).
+7. **Given** a selection with a gap (for example notes 1 and 3 selected, note 2 not), **When** the
+   user applies legato, **Then** nothing changes and a short message says that legato needs
+   consecutive notes.
 
 ---
 
@@ -143,7 +146,10 @@ shorter.
   audibly. It is never shortened to zero.
 - **Mixed selection**: when the selected notes have different articulations, the controls show a
   mixed state. Applying a mark sets it on all of them.
-- **Empty selection**: the articulation commands are unavailable when no note is selected.
+- **Empty selection**: the articulation buttons are disabled when no note is selected. Pressing an
+  articulation shortcut with nothing selected shows the "Nothing selected" message.
+- **Selection with gaps**: applying legato to selected notes that have an unselected note between
+  them is refused with a short message. Rests between selected notes are not gaps.
 - **Mark placement**: dots and lines are placed on the notehead side opposite the stem, as in
   standard notation, and never overlap the fingering diagram.
 
@@ -167,6 +173,9 @@ shorter.
   - Applying it to a selection of two or more notes slurs every selected note into the next one,
     except the last selected note.
   - Applying it to a single note slurs it to the following note.
+  - Applying it to a selection with a gap (an unselected note between two selected notes) MUST be
+    refused without any change, and a short message MUST tell the user that legato needs
+    consecutive notes.
   - Removing it unslurs the selected notes and the link into the first selected note, so no slur
     passes through any selected note.
 - **FR-006**: Each articulation command MUST be one undoable and redoable step, whatever the number
@@ -200,7 +209,8 @@ shorter.
 - **FR-013**: Playback MUST make the articulations audible:
   - staccato sounds for about half of the written length, never less than an audible minimum;
   - tenuto sounds for the full written length with a slightly stronger attack than a plain note;
-  - a note reached by a slur starts without a gap and without a new tongued attack;
+  - a note reached by a slur starts without a new tongued attack, and without a gap unless the
+    previous note is staccato;
   - plain notes sound exactly as before this feature.
 - **FR-014**: The playhead and the playing-note highlight MUST follow written note values, not the
   shortened sounding length.
@@ -214,10 +224,22 @@ shorter.
 - **FR-018**: MIDI export MUST write staccato notes at about half their written length and tenuto
   and slurred notes at full length. The plain-note behavior of MIDI export is unchanged.
 
+**Feedback on refused commands**
+
+- **FR-020**: Every time a command is refused because it is impossible, the app MUST show a short,
+  translated message explaining why. The message disappears by itself after a few seconds. This
+  covers the new articulation commands and the existing editing commands. Examples:
+  - no room for a note;
+  - a note outside the recorder range;
+  - an editing key pressed with nothing selected;
+  - legato on a selection with gaps;
+  - paste with an empty clipboard;
+  - undo or redo with nothing to undo or redo.
+
 **Language and access**
 
-- **FR-019**: All new labels, tooltips, shortcuts help and accessible names MUST be available in
-  Russian and English. The articulation of a note MUST be included in its accessible description.
+- **FR-019**: All new labels, tooltips and accessible names MUST be available in Russian and
+  English, and the tooltips and accessible names MUST include the keyboard shortcut. The articulation of a note MUST be included in its accessible description.
 
 ### Key Entities
 
@@ -260,5 +282,8 @@ shorter.
   shown on the staff and timeline only.
 - **Format version**: the melody file format version is increased by one. Loading an older version
   migrates it with all notes plain, in line with the project's data-format principle.
+- **Refusal messages**: the user asked for a message on every refused command, so FR-020 also
+  changes the existing editing commands from 001, which used to refuse some actions silently. The
+  existing transient edit hint is used as the notification.
 - **Keyboard shortcuts**: the specific keys are chosen during planning and must not conflict with
   existing shortcuts.

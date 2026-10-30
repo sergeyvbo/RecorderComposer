@@ -9,6 +9,7 @@ Everything not listed here is unchanged. The domain stays pure: no React, DOM or
 ```ts
 type NoteMark = "staccato" | "tenuto";
 interface Note { id; pitch; start; duration; mark?: NoteMark; slurNext?: true }
+type RejectReason = "noRoom" | "outOfRange" | "emptySelection" | "invalidArgs" | "notConsecutive";
 ```
 
 ## Articulation commands (`domain/articulation.ts`)
@@ -16,7 +17,7 @@ interface Note { id; pitch; start; duration; mark?: NoteMark; slurNext?: true }
 | Function | Behavior (spec refs) |
 |----------|----------------------|
 | `setMark(m, ids, mark: NoteMark \| null)` | Sets or clears `mark` on the listed notes; `null` clears it. Fails with `emptySelection` or `invalidArgs` (no change) (FR-001, FR-004) |
-| `setLegato(m, ids, on: boolean)` | `on`: with ≥ 2 notes, slurs each listed note into the next except the last listed; with 1 note, slurs it into the next note. `off`: clears links on the listed notes and the link into the first listed note. Fails with `emptySelection` or `invalidArgs` (no change) (FR-002, FR-003, FR-005) |
+| `setLegato(m, ids, on: boolean)` | `on`: with ≥ 2 notes, slurs each listed note into the next except the last listed; with 1 note, slurs it into the next note. `off`: clears links on the listed notes and the link into the first listed note. Fails with `emptySelection`, `notConsecutive` (`on` only: an unlisted note lies between the listed ones; rests are not gaps) or `invalidArgs` (no change) (FR-002, FR-003, FR-005) |
 | `deriveSlurs(m)` | `{ fromNoteId, toNoteId, noteIds }[]` in start order (FR-003, FR-008) |
 | `articulationState(m, ids)` | `{ mark, legatoApplied, canApplyLegato, canRemoveLegato }` for the toolbar (FR-007) |
 | `reconcileSlurs(prev, next, freshIds?)` | Applies the rules in data-model.md § Slur reconciliation (FR-012) |
@@ -34,8 +35,12 @@ interface Note { id; pitch; start; duration; mark?: NoteMark; slurNext?: true }
 `checkInvariants` also reports `note <id>: slurNext on last note`.
 
 **Property test**: for any random sequence of commands, every result satisfies all invariants, and
-every `slurNext` link points to a note that was already linked to it before that step, or both
-notes are fresh.
+every `slurNext` link after a step from note `n` to its successor `s` satisfies one of:
+
+- `s` came after `n` in the same slurred run before the step (this includes the unchanged link and
+  a run that closed up after a deletion);
+- the link was created by `setLegato`;
+- `n` and `s` are both fresh.
 
 ## Notation (`domain/notation.ts`)
 

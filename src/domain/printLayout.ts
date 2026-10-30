@@ -1,5 +1,35 @@
 import type { NotationBar, NotationModel } from './notation';
 
+/** A slur as drawn on one staff; `null` is an open end at the staff edge (FR-008). */
+export interface SlurPiece {
+  fromNoteId: string | null;
+  toNoteId: string | null;
+}
+
+/**
+ * The parts of the model's slurs that fall in the tick range [fromTick, toTick), for one staff:
+ * an end outside the range becomes an open (`null`) end; slurs entirely outside are dropped.
+ */
+export function slurPieces(model: NotationModel, fromTick: number, toTick: number): SlurPiece[] {
+  if (model.slurs.length === 0) return [];
+  const span = new Map<string, { start: number; end: number }>();
+  for (const bar of model.bars)
+    for (const e of bar.events) {
+      if (e.kind !== 'note' || !e.noteId) continue;
+      const s = span.get(e.noteId);
+      const end = e.startTick + e.durationTicks;
+      span.set(e.noteId, s ? { start: Math.min(s.start, e.startTick), end: Math.max(s.end, end) } : { start: e.startTick, end });
+    }
+  const pieces: SlurPiece[] = [];
+  for (const slur of model.slurs) {
+    const start = span.get(slur.fromNoteId)?.start;
+    const end = span.get(slur.toNoteId)?.end;
+    if (start === undefined || end === undefined || end <= fromTick || start >= toTick) continue;
+    pieces.push({ fromNoteId: start >= fromTick ? slur.fromNoteId : null, toNoteId: end <= toTick ? slur.toNoteId : null });
+  }
+  return pieces;
+}
+
 export interface PrintSystem {
   bars: NotationBar[];
   /** Only the first system repeats the time signature (clef + key appear on every system). */
@@ -11,6 +41,8 @@ export interface PrintSystem {
   barStartX: number[];
   barEndX: number[];
   width: number;
+  /** Slurs on this system, split at system breaks. */
+  slurs: SlurPiece[];
 }
 
 export interface PrintLayoutOptions {
@@ -82,7 +114,8 @@ export function layoutPrintSystems(model: NotationModel, pageWidth: number, opts
       x += barWidth(b) * scale;
       barEndX.push(x);
     }
-    return { bars, showTime, preludeWidth, eventX, barStartX, barEndX, width: x };
+    const slurs = slurPieces(model, bars[0]?.startTick ?? 0, bars.at(-1)?.endTick ?? 0);
+    return { bars, showTime, preludeWidth, eventX, barStartX, barEndX, width: x, slurs };
   });
   return { systems, sp };
 }

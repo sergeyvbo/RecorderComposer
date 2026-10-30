@@ -20,6 +20,11 @@ them. Runs entirely in the browser — no server, no account.
   octaves as до¹–ре³ (Russian) or C4–D6 (English).
 - **Keys** with up to four sharps/flats, and transposition that reports notes leaving the range and
   offers the octave alternative.
+- **Articulations**: staccato (`S`), tenuto (`T`) and legato slurs (`L` to apply, `Shift+L` to
+  remove), from the toolbar or the keyboard. They are drawn in standard notation on screen and in
+  print, marked on the timeline, heard on playback, and staccato is shortened in MIDI export.
+- **Clear refusals**: whenever an action is impossible (nothing selected, no room, legato over a
+  selection with gaps, nothing to undo…), a short message says why.
 
 Fingerings (standard and alternates) are taken from Yamaha's
 [soprano recorder (Baroque) fingering chart](https://www.yamaha.com/en/musical_instrument_guide/common/images/recorder/fingering_baroque.pdf).
@@ -47,14 +52,16 @@ Regenerate test fixtures with `node --experimental-strip-types scripts/make-fixt
 `src/domain` (pure TypeScript music logic, no React/DOM) ← `src/state` (Zustand store, history) ←
 `src/ui`, `src/audio` (Tone.js), `src/persistence` (IndexedDB, preferences) ← `src/bootstrap.ts` /
 `src/main.tsx`. Lint rules enforce the layering. Design documents:
-[`specs/001-recorder-composer/`](specs/001-recorder-composer/); project principles:
+[`specs/001-recorder-composer/`](specs/001-recorder-composer/),
+[`specs/002-note-articulations/`](specs/002-note-articulations/); project principles:
 [`.specify/memory/constitution.md`](.specify/memory/constitution.md).
 
 ## Melody files
 
 `.rcm.json` files follow
-[`melody-file.schema.json`](specs/001-recorder-composer/contracts/melody-file.schema.json)
-(`formatVersion: 1`); the same document is what is stored in the browser.
+[`melody-file.schema.json`](specs/002-note-articulations/contracts/melody-file.schema.json)
+(`formatVersion: 2`, which adds each note's optional `mark` and `slurNext`); the same document is
+what is stored in the browser. Version 1 files still open, with every note plain.
 
 ## Licenses
 

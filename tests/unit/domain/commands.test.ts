@@ -8,7 +8,10 @@ import {
   setTimeSignature,
   setTitle,
   setTempo,
+  transpose,
 } from '@/domain/commands';
+import { defaultPreferences } from '@/state/prefs';
+import { createAppStore } from '@/state/store';
 import type { EditResult, Melody } from '@/domain/types';
 import { idGen, melodyWith, Q, S } from './helpers';
 
@@ -191,5 +194,44 @@ describe('setters', () => {
     expect(ok(setTitle(m, '  Twinkle  ')).melody.title).toBe('Twinkle');
     expect(setTitle(m, '   ')).toEqual({ ok: false, reason: 'invalidArgs' });
     expect(setTitle(m, 'x'.repeat(121))).toEqual({ ok: false, reason: 'invalidArgs' });
+  });
+});
+
+describe('editing keeps articulation (002 FR-011)', () => {
+  const marked = () =>
+    melodyWith([
+      { id: 'a', pitch: 72, start: 0, duration: Q, mark: 'staccato' },
+      { id: 'b', pitch: 76, start: 2 * Q, duration: Q, mark: 'tenuto' },
+    ]);
+
+  it('moveNotes, resizeNote and transpose keep the mark', () => {
+    expect(byId(ok(moveNotes(marked(), ['a'], { dTicks: Q, dPitch: 1, snap: S })).melody, 'a').mark).toBe('staccato');
+    expect(byId(ok(resizeNote(marked(), 'b', { edge: 'end', toTick: 4 * Q, snap: S })).melody, 'b').mark).toBe('tenuto');
+    expect(ok(transpose(marked(), 2)).melody.notes.map((n) => n.mark)).toEqual(['staccato', 'tenuto']);
+  });
+
+  it('pasteNotes creates notes with the copied mark', () => {
+    const clip = [
+      { pitch: 72, offset: 0, duration: Q, mark: 'tenuto' as const },
+      { pitch: 74, offset: Q, duration: Q },
+    ];
+    const r = ok(pasteNotes(marked(), clip, 8 * Q, S, { newId: idGen('p') }));
+    expect(byId(r.melody, 'p1').mark).toBe('tenuto');
+    expect('mark' in byId(r.melody, 'p2')).toBe(false);
+  });
+
+  it("the store's copy and cut put the mark on the clipboard", () => {
+    const store = createAppStore(defaultPreferences('en'), { now: () => '2026-01-01T00:00:00.000Z', newId: idGen('s') }, marked());
+    const { actions } = store.getState();
+    actions.select(['a', 'b']);
+    actions.copy();
+    expect(store.getState().clipboard).toEqual([
+      { pitch: 72, offset: 0, duration: Q, mark: 'staccato' },
+      { pitch: 76, offset: 2 * Q, duration: Q, mark: 'tenuto' },
+    ]);
+    store.setState({ clipboard: [] });
+    actions.cut();
+    expect(store.getState().clipboard.map((c) => c.mark)).toEqual(['staccato', 'tenuto']);
+    expect(store.getState().melody.notes).toEqual([]);
   });
 });

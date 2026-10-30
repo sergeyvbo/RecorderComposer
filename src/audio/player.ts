@@ -1,5 +1,5 @@
 import type * as ToneNS from 'tone';
-import { pitchToHz, toSchedule } from '@/domain/schedule';
+import { pitchToHz, toSchedule, type ScheduledNote } from '@/domain/schedule';
 import type { Melody } from '@/domain/types';
 import { audiblePositionTicks } from './clock';
 
@@ -45,6 +45,45 @@ function createVoice(Tone: Tone): Voice {
   };
 }
 
+/** The parts of a voice the scheduler drives (Tone.Synth / Tone.NoiseSynth in the app). */
+export interface VoiceTarget {
+  synth: {
+    triggerAttack: (hz: number, time: number, velocity: number) => unknown;
+    triggerRelease: (time: number) => unknown;
+    setNote: (hz: number, time: number) => unknown;
+  };
+  breath: { triggerAttackRelease: (duration: number, time: number) => unknown };
+}
+
+/** Never shorter than this, so even the shortest staccato is audible. */
+const MIN_SOUND_SEC = 0.03;
+
+/**
+ * Map the domain schedule onto the voice (002 research R7): a connected (slurred) note only
+ * changes pitch; other notes attack at their velocity, with a breath chiff when tongued, and are
+ * released after their sounding length unless the next note takes over at that moment.
+ */
+export function scheduleNotes(
+  transport: { schedule: (cb: (time: number) => void, at: number) => unknown },
+  voice: VoiceTarget,
+  notes: readonly ScheduledNote[],
+) {
+  notes.forEach((n, k) => {
+    const next = notes[k + 1];
+    const sound = Math.max(MIN_SOUND_SEC, n.soundSec);
+    const handsOver = !!next && (next.connected || next.startSec <= n.startSec + sound + 1e-6);
+    transport.schedule((time) => {
+      const hz = pitchToHz(n.pitch);
+      if (n.connected) voice.synth.setNote(hz, time);
+      else {
+        voice.synth.triggerAttack(hz, time, n.velocity);
+        if (n.tongued) voice.breath.triggerAttackRelease(0.08, time);
+      }
+      if (!handsOver) voice.synth.triggerRelease(time + sound);
+    }, n.startSec);
+  });
+}
+
 export function createTonePlayer(): Player {
   let Tone: Tone | null = null;
   let voice: Voice | null = null;
@@ -77,14 +116,7 @@ export function createTonePlayer(): Player {
     v.synth.triggerRelease();
     originTick = fromTick;
     bpm = m.tempoBpm;
-    for (const n of toSchedule(m, fromTick)) {
-      // Leave a tiny gap between notes so repeated pitches re-articulate.
-      const dur = Math.max(0.03, n.durationSec - 0.015);
-      transport.schedule((time) => {
-        v.synth.triggerAttackRelease(pitchToHz(n.pitch), dur, time);
-        v.breath.triggerAttackRelease(0.08, time);
-      }, n.startSec);
-    }
+    scheduleNotes(transport, v, toSchedule(m, fromTick));
     transport.start('+0.02', 0);
     playing = true;
   };

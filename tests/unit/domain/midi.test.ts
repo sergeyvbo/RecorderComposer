@@ -39,4 +39,16 @@ describe('toMidiBytes (US8)', () => {
     expect(keySig({ tonic: 'C', mode: 'major' })).toEqual([2, 0x00, 0]);
     expect(keySig({ tonic: 'D', mode: 'minor' })).toEqual([2, 0xff, 1]);
   });
+
+  it('writes staccato at half length (at least 30 ticks); tenuto, slurred and plain at full length (002 FR-018)', () => {
+    const m = melodyWith([
+      { id: 'a', pitch: 72, start: 0, duration: Q, mark: 'staccato' },
+      { id: 'b', pitch: 74, start: Q, duration: 60, mark: 'staccato' },
+      { id: 'c', pitch: 76, start: 2 * Q, duration: Q, mark: 'tenuto', slurNext: true },
+      { id: 'd', pitch: 77, start: 3 * Q, duration: Q },
+    ]);
+    const notes = new Midi(toMidiBytes(m)).tracks[0]!.notes;
+    expect(notes.map((n) => n.durationTicks)).toEqual([240, 30, Q, Q]);
+    expect(new Set(notes.map((n) => n.velocity)).size).toBe(1);
+  });
 });

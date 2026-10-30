@@ -56,3 +56,27 @@ describe('layoutPrintSystems', () => {
     expect(layoutPrintSystems(layoutNotation(melodyWith([])), page).systems).toEqual([]);
   });
 });
+
+describe('layoutPrintSystems — slur pieces per system (002 FR-008)', () => {
+  const page = 680;
+
+  it('keeps a slur inside one system whole and splits one that crosses a break', () => {
+    const base = bars(12, E);
+    const first = layoutPrintSystems(layoutNotation(base), page).systems;
+    expect(first.length).toBeGreaterThan(1);
+    const noteIdsOf = (s: (typeof first)[number]) =>
+      s.bars.flatMap((b) => b.events.filter((e) => e.kind === 'note').map((e) => e.noteId as string));
+    const sys0 = noteIdsOf(first[0]!);
+    const sys1 = noteIdsOf(first[1]!);
+    const lastOf0 = sys0.at(-1)!;
+    const inside = sys0[0]!;
+    const notes = base.notes.map((n) => (n.id === lastOf0 || n.id === inside ? { ...n, slurNext: true as const } : n));
+    const { systems } = layoutPrintSystems(layoutNotation({ ...base, notes }), page);
+    expect(systems[0]!.slurs).toEqual([
+      { fromNoteId: inside, toNoteId: sys0[1] },
+      { fromNoteId: lastOf0, toNoteId: null },
+    ]);
+    expect(systems[1]!.slurs).toEqual([{ fromNoteId: null, toNoteId: sys1[0] }]);
+    expect(systems.slice(2).every((s) => s.slurs.length === 0)).toBe(true);
+  });
+});

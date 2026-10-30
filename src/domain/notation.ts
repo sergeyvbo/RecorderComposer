@@ -1,5 +1,6 @@
+import { deriveSlurs } from './articulation';
 import { keyAccidental, keySignature, spell, ticksPerBar, ticksPerBeat, type Accidental, type KeySignature, type Letter } from './keys';
-import { WRITTEN_OFFSET, type Melody, type Note, type TimeSignature } from './types';
+import { WRITTEN_OFFSET, type Melody, type Note, type NoteMark, type TimeSignature } from './types';
 
 /** Note value as the denominator: 1 = whole, 2 = half, … 32 = thirty-second. */
 export type NoteValue = 1 | 2 | 4 | 8 | 16 | 32;
@@ -24,6 +25,8 @@ export interface NotationEvent {
   beamGroup: number | null;
   /** Rest filling an entire empty bar (drawn as a centred whole rest). */
   wholeBar?: boolean;
+  /** Staccato/tenuto, on the first piece of a tied note only. */
+  mark?: NoteMark;
 }
 
 export interface NotationBar {
@@ -33,10 +36,17 @@ export interface NotationBar {
   events: NotationEvent[];
 }
 
+/** A slur from the first piece of one note to the last piece of another (FR-008). */
+export interface NotationSlur {
+  fromNoteId: string;
+  toNoteId: string;
+}
+
 export interface NotationModel {
   bars: NotationBar[];
   keySignature: KeySignature;
   timeSignature: TimeSignature;
+  slurs: NotationSlur[];
 }
 
 const VALUES: readonly { ticks: number; value: NoteValue; dots: 0 | 1 }[] = [
@@ -135,6 +145,7 @@ export function layoutNotation(m: Melody): NotationModel {
           kind: 'note', noteId: n.id, startTick: tick, durationTicks: piece.ticks, value: piece.value,
           dots: piece.dots, tieToNext: tick + piece.ticks < n.start + n.duration, tieFromPrev: continuation,
           writtenPitch: n.pitch + WRITTEN_OFFSET, staffStep, accidental, beamGroup: null,
+          ...(n.mark && !continuation ? { mark: n.mark } : {}),
         });
       });
     };
@@ -173,5 +184,6 @@ export function layoutNotation(m: Melody): NotationModel {
     bars.push({ index: b, startTick: barStart, endTick: barEnd, events });
   }
 
-  return { bars, keySignature: keySignature(m.key), timeSignature: ts };
+  const slurs = deriveSlurs(m).map(({ fromNoteId, toNoteId }) => ({ fromNoteId, toNoteId }));
+  return { bars, keySignature: keySignature(m.key), timeSignature: ts, slurs };
 }
