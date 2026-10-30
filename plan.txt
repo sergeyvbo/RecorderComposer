@@ -1,0 +1,24 @@
+Web application "Recorder Composer"
+
+Purpose is to write music for baroque recorder flute and learn to play it using example finger charts and playback
+
+application has 3 panels, resizeable and togglable on/off:
+
+1. composing area with a scrollable "piano" buttons on the left. It should cover all the range of soprano baroque recorder flute
+and a timeline with notes visually shown as colored rectangles of some height and length.
+2. sheet music list syncronized with the composing area
+3. recorder flute fingering chart showing fingerings of each note
+
+functions:
+- draw a melody adding, moving, stretching, deleting rectangles. no polyfony or going out of range allowed. changes immediately propagated to panels 2 and 3 if possible. drag and drop, multiselection
+- play/pause the current melody. track current position on all 3 panels. Time ruler on top. set up tempo
+- store melodies in some format
+- (optional) export as MIDI
+- print as sheetmusic only or sheetmusic with finger chart
+- interface in russian and english. notes in do re mi fa sol la si and CDEFGAB formats
+- select different tonalities (auto-transposition between tonalities maybe?)
+
+tech stack
+preferrably typescript / react
+opensource libraries is ok to use
+

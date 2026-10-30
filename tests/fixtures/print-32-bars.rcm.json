@@ -1,0 +1,981 @@
+{
+  "format": "recorder-composer",
+  "formatVersion": 1,
+  "melody": {
+    "id": "22222222-2222-4222-8222-222222222222",
+    "title": "Thirty-two bars",
+    "tempoBpm": 100,
+    "timeSignature": {
+      "beats": 4,
+      "beatUnit": 4
+    },
+    "key": {
+      "tonic": "C",
+      "mode": "major"
+    },
+    "notes": [
+      {
+        "id": "n1",
+        "pitch": 72,
+        "start": 0,
+        "duration": 480
+      },
+      {
+        "id": "n2",
+        "pitch": 74,
+        "start": 480,
+        "duration": 240
+      },
+      {
+        "id": "n3",
+        "pitch": 76,
+        "start": 720,
+        "duration": 240
+      },
+      {
+        "id": "n4",
+        "pitch": 77,
+        "start": 960,
+        "duration": 480
+      },
+      {
+        "id": "n5",
+        "pitch": 79,
+        "start": 1440,
+        "duration": 480
+      },
+      {
+        "id": "n6",
+        "pitch": 81,
+        "start": 1920,
+        "duration": 480
+      },
+      {
+        "id": "n7",
+        "pitch": 83,
+        "start": 2400,
+        "duration": 240
+      },
+      {
+        "id": "n8",
+        "pitch": 84,
+        "start": 2640,
+        "duration": 240
+      },
+      {
+        "id": "n9",
+        "pitch": 72,
+        "start": 2880,
+        "duration": 480
+      },
+      {
+        "id": "n10",
+        "pitch": 74,
+        "start": 3360,
+        "duration": 480
+      },
+      {
+        "id": "n11",
+        "pitch": 76,
+        "start": 3840,
+        "duration": 480
+      },
+      {
+        "id": "n12",
+        "pitch": 77,
+        "start": 4320,
+        "duration": 240
+      },
+      {
+        "id": "n13",
+        "pitch": 79,
+        "start": 4560,
+        "duration": 240
+      },
+      {
+        "id": "n14",
+        "pitch": 81,
+        "start": 4800,
+        "duration": 480
+      },
+      {
+        "id": "n15",
+        "pitch": 83,
+        "start": 5280,
+        "duration": 480
+      },
+      {
+        "id": "n16",
+        "pitch": 84,
+        "start": 5760,
+        "duration": 480
+      },
+      {
+        "id": "n17",
+        "pitch": 72,
+        "start": 6240,
+        "duration": 240
+      },
+      {
+        "id": "n18",
+        "pitch": 74,
+        "start": 6480,
+        "duration": 240
+      },
+      {
+        "id": "n19",
+        "pitch": 76,
+        "start": 6720,
+        "duration": 480
+      },
+      {
+        "id": "n20",
+        "pitch": 77,
+        "start": 7200,
+        "duration": 480
+      },
+      {
+        "id": "n21",
+        "pitch": 79,
+        "start": 7680,
+        "duration": 480
+      },
+      {
+        "id": "n22",
+        "pitch": 81,
+        "start": 8160,
+        "duration": 240
+      },
+      {
+        "id": "n23",
+        "pitch": 83,
+        "start": 8400,
+        "duration": 240
+      },
+      {
+        "id": "n24",
+        "pitch": 84,
+        "start": 8640,
+        "duration": 480
+      },
+      {
+        "id": "n25",
+        "pitch": 72,
+        "start": 9120,
+        "duration": 480
+      },
+      {
+        "id": "n26",
+        "pitch": 74,
+        "start": 9600,
+        "duration": 480
+      },
+      {
+        "id": "n27",
+        "pitch": 76,
+        "start": 10080,
+        "duration": 240
+      },
+      {
+        "id": "n28",
+        "pitch": 77,
+        "start": 10320,
+        "duration": 240
+      },
+      {
+        "id": "n29",
+        "pitch": 79,
+        "start": 10560,
+        "duration": 480
+      },
+      {
+        "id": "n30",
+        "pitch": 81,
+        "start": 11040,
+        "duration": 480
+      },
+      {
+        "id": "n31",
+        "pitch": 83,
+        "start": 11520,
+        "duration": 480
+      },
+      {
+        "id": "n32",
+        "pitch": 84,
+        "start": 12000,
+        "duration": 240
+      },
+      {
+        "id": "n33",
+        "pitch": 72,
+        "start": 12240,
+        "duration": 240
+      },
+      {
+        "id": "n34",
+        "pitch": 74,
+        "start": 12480,
+        "duration": 480
+      },
+      {
+        "id": "n35",
+        "pitch": 76,
+        "start": 12960,
+        "duration": 480
+      },
+      {
+        "id": "n36",
+        "pitch": 77,
+        "start": 13440,
+        "duration": 480
+      },
+      {
+        "id": "n37",
+        "pitch": 79,
+        "start": 13920,
+        "duration": 240
+      },
+      {
+        "id": "n38",
+        "pitch": 81,
+        "start": 14160,
+        "duration": 240
+      },
+      {
+        "id": "n39",
+        "pitch": 83,
+        "start": 14400,
+        "duration": 480
+      },
+      {
+        "id": "n40",
+        "pitch": 84,
+        "start": 14880,
+        "duration": 480
+      },
+      {
+        "id": "n41",
+        "pitch": 72,
+        "start": 15360,
+        "duration": 480
+      },
+      {
+        "id": "n42",
+        "pitch": 74,
+        "start": 15840,
+        "duration": 240
+      },
+      {
+        "id": "n43",
+        "pitch": 76,
+        "start": 16080,
+        "duration": 240
+      },
+      {
+        "id": "n44",
+        "pitch": 77,
+        "start": 16320,
+        "duration": 480
+      },
+      {
+        "id": "n45",
+        "pitch": 79,
+        "start": 16800,
+        "duration": 480
+      },
+      {
+        "id": "n46",
+        "pitch": 81,
+        "start": 17280,
+        "duration": 480
+      },
+      {
+        "id": "n47",
+        "pitch": 83,
+        "start": 17760,
+        "duration": 240
+      },
+      {
+        "id": "n48",
+        "pitch": 84,
+        "start": 18000,
+        "duration": 240
+      },
+      {
+        "id": "n49",
+        "pitch": 72,
+        "start": 18240,
+        "duration": 480
+      },
+      {
+        "id": "n50",
+        "pitch": 74,
+        "start": 18720,
+        "duration": 480
+      },
+      {
+        "id": "n51",
+        "pitch": 76,
+        "start": 19200,
+        "duration": 480
+      },
+      {
+        "id": "n52",
+        "pitch": 77,
+        "start": 19680,
+        "duration": 240
+      },
+      {
+        "id": "n53",
+        "pitch": 79,
+        "start": 19920,
+        "duration": 240
+      },
+      {
+        "id": "n54",
+        "pitch": 81,
+        "start": 20160,
+        "duration": 480
+      },
+      {
+        "id": "n55",
+        "pitch": 83,
+        "start": 20640,
+        "duration": 480
+      },
+      {
+        "id": "n56",
+        "pitch": 84,
+        "start": 21120,
+        "duration": 480
+      },
+      {
+        "id": "n57",
+        "pitch": 72,
+        "start": 21600,
+        "duration": 240
+      },
+      {
+        "id": "n58",
+        "pitch": 74,
+        "start": 21840,
+        "duration": 240
+      },
+      {
+        "id": "n59",
+        "pitch": 76,
+        "start": 22080,
+        "duration": 480
+      },
+      {
+        "id": "n60",
+        "pitch": 77,
+        "start": 22560,
+        "duration": 480
+      },
+      {
+        "id": "n61",
+        "pitch": 79,
+        "start": 23040,
+        "duration": 480
+      },
+      {
+        "id": "n62",
+        "pitch": 81,
+        "start": 23520,
+        "duration": 240
+      },
+      {
+        "id": "n63",
+        "pitch": 83,
+        "start": 23760,
+        "duration": 240
+      },
+      {
+        "id": "n64",
+        "pitch": 84,
+        "start": 24000,
+        "duration": 480
+      },
+      {
+        "id": "n65",
+        "pitch": 72,
+        "start": 24480,
+        "duration": 480
+      },
+      {
+        "id": "n66",
+        "pitch": 74,
+        "start": 24960,
+        "duration": 480
+      },
+      {
+        "id": "n67",
+        "pitch": 76,
+        "start": 25440,
+        "duration": 240
+      },
+      {
+        "id": "n68",
+        "pitch": 77,
+        "start": 25680,
+        "duration": 240
+      },
+      {
+        "id": "n69",
+        "pitch": 79,
+        "start": 25920,
+        "duration": 480
+      },
+      {
+        "id": "n70",
+        "pitch": 81,
+        "start": 26400,
+        "duration": 480
+      },
+      {
+        "id": "n71",
+        "pitch": 83,
+        "start": 26880,
+        "duration": 480
+      },
+      {
+        "id": "n72",
+        "pitch": 84,
+        "start": 27360,
+        "duration": 240
+      },
+      {
+        "id": "n73",
+        "pitch": 72,
+        "start": 27600,
+        "duration": 240
+      },
+      {
+        "id": "n74",
+        "pitch": 74,
+        "start": 27840,
+        "duration": 480
+      },
+      {
+        "id": "n75",
+        "pitch": 76,
+        "start": 28320,
+        "duration": 480
+      },
+      {
+        "id": "n76",
+        "pitch": 77,
+        "start": 28800,
+        "duration": 480
+      },
+      {
+        "id": "n77",
+        "pitch": 79,
+        "start": 29280,
+        "duration": 240
+      },
+      {
+        "id": "n78",
+        "pitch": 81,
+        "start": 29520,
+        "duration": 240
+      },
+      {
+        "id": "n79",
+        "pitch": 83,
+        "start": 29760,
+        "duration": 480
+      },
+      {
+        "id": "n80",
+        "pitch": 84,
+        "start": 30240,
+        "duration": 480
+      },
+      {
+        "id": "n81",
+        "pitch": 72,
+        "start": 30720,
+        "duration": 480
+      },
+      {
+        "id": "n82",
+        "pitch": 74,
+        "start": 31200,
+        "duration": 240
+      },
+      {
+        "id": "n83",
+        "pitch": 76,
+        "start": 31440,
+        "duration": 240
+      },
+      {
+        "id": "n84",
+        "pitch": 77,
+        "start": 31680,
+        "duration": 480
+      },
+      {
+        "id": "n85",
+        "pitch": 79,
+        "start": 32160,
+        "duration": 480
+      },
+      {
+        "id": "n86",
+        "pitch": 81,
+        "start": 32640,
+        "duration": 480
+      },
+      {
+        "id": "n87",
+        "pitch": 83,
+        "start": 33120,
+        "duration": 240
+      },
+      {
+        "id": "n88",
+        "pitch": 84,
+        "start": 33360,
+        "duration": 240
+      },
+      {
+        "id": "n89",
+        "pitch": 72,
+        "start": 33600,
+        "duration": 480
+      },
+      {
+        "id": "n90",
+        "pitch": 74,
+        "start": 34080,
+        "duration": 480
+      },
+      {
+        "id": "n91",
+        "pitch": 76,
+        "start": 34560,
+        "duration": 480
+      },
+      {
+        "id": "n92",
+        "pitch": 77,
+        "start": 35040,
+        "duration": 240
+      },
+      {
+        "id": "n93",
+        "pitch": 79,
+        "start": 35280,
+        "duration": 240
+      },
+      {
+        "id": "n94",
+        "pitch": 81,
+        "start": 35520,
+        "duration": 480
+      },
+      {
+        "id": "n95",
+        "pitch": 83,
+        "start": 36000,
+        "duration": 480
+      },
+      {
+        "id": "n96",
+        "pitch": 84,
+        "start": 36480,
+        "duration": 480
+      },
+      {
+        "id": "n97",
+        "pitch": 72,
+        "start": 36960,
+        "duration": 240
+      },
+      {
+        "id": "n98",
+        "pitch": 74,
+        "start": 37200,
+        "duration": 240
+      },
+      {
+        "id": "n99",
+        "pitch": 76,
+        "start": 37440,
+        "duration": 480
+      },
+      {
+        "id": "n100",
+        "pitch": 77,
+        "start": 37920,
+        "duration": 480
+      },
+      {
+        "id": "n101",
+        "pitch": 79,
+        "start": 38400,
+        "duration": 480
+      },
+      {
+        "id": "n102",
+        "pitch": 81,
+        "start": 38880,
+        "duration": 240
+      },
+      {
+        "id": "n103",
+        "pitch": 83,
+        "start": 39120,
+        "duration": 240
+      },
+      {
+        "id": "n104",
+        "pitch": 84,
+        "start": 39360,
+        "duration": 480
+      },
+      {
+        "id": "n105",
+        "pitch": 72,
+        "start": 39840,
+        "duration": 480
+      },
+      {
+        "id": "n106",
+        "pitch": 74,
+        "start": 40320,
+        "duration": 480
+      },
+      {
+        "id": "n107",
+        "pitch": 76,
+        "start": 40800,
+        "duration": 240
+      },
+      {
+        "id": "n108",
+        "pitch": 77,
+        "start": 41040,
+        "duration": 240
+      },
+      {
+        "id": "n109",
+        "pitch": 79,
+        "start": 41280,
+        "duration": 480
+      },
+      {
+        "id": "n110",
+        "pitch": 81,
+        "start": 41760,
+        "duration": 480
+      },
+      {
+        "id": "n111",
+        "pitch": 83,
+        "start": 42240,
+        "duration": 480
+      },
+      {
+        "id": "n112",
+        "pitch": 84,
+        "start": 42720,
+        "duration": 240
+      },
+      {
+        "id": "n113",
+        "pitch": 72,
+        "start": 42960,
+        "duration": 240
+      },
+      {
+        "id": "n114",
+        "pitch": 74,
+        "start": 43200,
+        "duration": 480
+      },
+      {
+        "id": "n115",
+        "pitch": 76,
+        "start": 43680,
+        "duration": 480
+      },
+      {
+        "id": "n116",
+        "pitch": 77,
+        "start": 44160,
+        "duration": 480
+      },
+      {
+        "id": "n117",
+        "pitch": 79,
+        "start": 44640,
+        "duration": 240
+      },
+      {
+        "id": "n118",
+        "pitch": 81,
+        "start": 44880,
+        "duration": 240
+      },
+      {
+        "id": "n119",
+        "pitch": 83,
+        "start": 45120,
+        "duration": 480
+      },
+      {
+        "id": "n120",
+        "pitch": 84,
+        "start": 45600,
+        "duration": 480
+      },
+      {
+        "id": "n121",
+        "pitch": 72,
+        "start": 46080,
+        "duration": 480
+      },
+      {
+        "id": "n122",
+        "pitch": 74,
+        "start": 46560,
+        "duration": 240
+      },
+      {
+        "id": "n123",
+        "pitch": 76,
+        "start": 46800,
+        "duration": 240
+      },
+      {
+        "id": "n124",
+        "pitch": 77,
+        "start": 47040,
+        "duration": 480
+      },
+      {
+        "id": "n125",
+        "pitch": 79,
+        "start": 47520,
+        "duration": 480
+      },
+      {
+        "id": "n126",
+        "pitch": 81,
+        "start": 48000,
+        "duration": 480
+      },
+      {
+        "id": "n127",
+        "pitch": 83,
+        "start": 48480,
+        "duration": 240
+      },
+      {
+        "id": "n128",
+        "pitch": 84,
+        "start": 48720,
+        "duration": 240
+      },
+      {
+        "id": "n129",
+        "pitch": 72,
+        "start": 48960,
+        "duration": 480
+      },
+      {
+        "id": "n130",
+        "pitch": 74,
+        "start": 49440,
+        "duration": 480
+      },
+      {
+        "id": "n131",
+        "pitch": 76,
+        "start": 49920,
+        "duration": 480
+      },
+      {
+        "id": "n132",
+        "pitch": 77,
+        "start": 50400,
+        "duration": 240
+      },
+      {
+        "id": "n133",
+        "pitch": 79,
+        "start": 50640,
+        "duration": 240
+      },
+      {
+        "id": "n134",
+        "pitch": 81,
+        "start": 50880,
+        "duration": 480
+      },
+      {
+        "id": "n135",
+        "pitch": 83,
+        "start": 51360,
+        "duration": 480
+      },
+      {
+        "id": "n136",
+        "pitch": 84,
+        "start": 51840,
+        "duration": 480
+      },
+      {
+        "id": "n137",
+        "pitch": 72,
+        "start": 52320,
+        "duration": 240
+      },
+      {
+        "id": "n138",
+        "pitch": 74,
+        "start": 52560,
+        "duration": 240
+      },
+      {
+        "id": "n139",
+        "pitch": 76,
+        "start": 52800,
+        "duration": 480
+      },
+      {
+        "id": "n140",
+        "pitch": 77,
+        "start": 53280,
+        "duration": 480
+      },
+      {
+        "id": "n141",
+        "pitch": 79,
+        "start": 53760,
+        "duration": 480
+      },
+      {
+        "id": "n142",
+        "pitch": 81,
+        "start": 54240,
+        "duration": 240
+      },
+      {
+        "id": "n143",
+        "pitch": 83,
+        "start": 54480,
+        "duration": 240
+      },
+      {
+        "id": "n144",
+        "pitch": 84,
+        "start": 54720,
+        "duration": 480
+      },
+      {
+        "id": "n145",
+        "pitch": 72,
+        "start": 55200,
+        "duration": 480
+      },
+      {
+        "id": "n146",
+        "pitch": 74,
+        "start": 55680,
+        "duration": 480
+      },
+      {
+        "id": "n147",
+        "pitch": 76,
+        "start": 56160,
+        "duration": 240
+      },
+      {
+        "id": "n148",
+        "pitch": 77,
+        "start": 56400,
+        "duration": 240
+      },
+      {
+        "id": "n149",
+        "pitch": 79,
+        "start": 56640,
+        "duration": 480
+      },
+      {
+        "id": "n150",
+        "pitch": 81,
+        "start": 57120,
+        "duration": 480
+      },
+      {
+        "id": "n151",
+        "pitch": 83,
+        "start": 57600,
+        "duration": 480
+      },
+      {
+        "id": "n152",
+        "pitch": 84,
+        "start": 58080,
+        "duration": 240
+      },
+      {
+        "id": "n153",
+        "pitch": 72,
+        "start": 58320,
+        "duration": 240
+      },
+      {
+        "id": "n154",
+        "pitch": 74,
+        "start": 58560,
+        "duration": 480
+      },
+      {
+        "id": "n155",
+        "pitch": 76,
+        "start": 59040,
+        "duration": 480
+      },
+      {
+        "id": "n156",
+        "pitch": 77,
+        "start": 59520,
+        "duration": 480
+      },
+      {
+        "id": "n157",
+        "pitch": 79,
+        "start": 60000,
+        "duration": 240
+      },
+      {
+        "id": "n158",
+        "pitch": 81,
+        "start": 60240,
+        "duration": 240
+      },
+      {
+        "id": "n159",
+        "pitch": 83,
+        "start": 60480,
+        "duration": 480
+      },
+      {
+        "id": "n160",
+        "pitch": 84,
+        "start": 60960,
+        "duration": 480
+      }
+    ],
+    "createdAt": "2026-10-29T10:00:00.000Z",
+    "updatedAt": "2026-10-29T10:00:00.000Z"
+  }
+}

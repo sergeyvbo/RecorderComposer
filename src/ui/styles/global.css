@@ -1,0 +1,264 @@
+@font-face {
+  font-family: 'Bravura';
+  src: url('/fonts/Bravura.woff2') format('woff2');
+  font-display: block;
+}
+
+:root {
+  --bg: #fafaf7;
+  --panel: #ffffff;
+  --fg: #1d1d1f;
+  --muted: #6b6b70;
+  --line: #d7d7dc;
+  --line-strong: #9a9aa2;
+  --bar: #6e6e78;
+  --accent: #2f6fde;
+  --accent-fg: #ffffff;
+  --select: #2f6fde;
+  --hover: #f0b429;
+  --playhead: #e0245e;
+  --key-white: #ffffff;
+  --key-black: #2a2a2e;
+  --warn-bg: #fff4ce;
+  --warn-fg: #5c4400;
+  --hole-open: #ffffff;
+  --hole-closed: #1d1d1f;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #16161a;
+    --panel: #1e1e23;
+    --fg: #ececf0;
+    --muted: #a0a0aa;
+    --line: #33333b;
+    --line-strong: #55555f;
+    --bar: #8a8a96;
+    --accent: #6ea1ff;
+    --accent-fg: #0b1020;
+    --select: #6ea1ff;
+    --hover: #f5c451;
+    --playhead: #ff5c8a;
+    --key-white: #2a2a30;
+    --key-black: #0c0c0f;
+    --warn-bg: #3d3210;
+    --warn-fg: #ffe9a6;
+    --hole-open: #1e1e23;
+    --hole-closed: #ececf0;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --bg: #16161a;
+  --panel: #1e1e23;
+  --fg: #ececf0;
+  --muted: #a0a0aa;
+  --line: #33333b;
+  --line-strong: #55555f;
+  --bar: #8a8a96;
+  --accent: #6ea1ff;
+  --accent-fg: #0b1020;
+  --select: #6ea1ff;
+  --hover: #f5c451;
+  --playhead: #ff5c8a;
+  --key-white: #2a2a30;
+  --key-black: #0c0c0f;
+  --warn-bg: #3d3210;
+  --warn-fg: #ffe9a6;
+  --hole-open: #1e1e23;
+  --hole-closed: #ececf0;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+}
+
+button,
+select,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+button,
+select,
+input[type='number'] {
+  background: var(--panel);
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  padding: 4px 8px;
+  min-height: 30px;
+}
+
+button:disabled {
+  opacity: 0.45;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.toolbar-group + .toolbar-group {
+  padding-left: 8px;
+  border-left: 1px solid var(--line);
+}
+
+.toggle[aria-pressed='true'] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-fg);
+}
+
+.workspace {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+.panel {
+  height: 100%;
+  overflow: hidden;
+  background: var(--panel);
+  position: relative;
+}
+
+.panel-resize {
+  height: 6px;
+  background: var(--line);
+}
+
+.panel-resize:hover,
+.panel-resize[data-resize-handle-active] {
+  background: var(--accent);
+}
+
+.hint {
+  font-size: 12px;
+  color: var(--muted);
+  min-width: 12em;
+}
+
+.banner {
+  background: var(--warn-bg);
+  color: var(--warn-fg);
+  padding: 6px 12px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.statusbar {
+  font-size: 12px;
+  color: var(--muted);
+  padding: 2px 10px;
+  border-top: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgb(0 0 0 / 35%);
+  display: grid;
+  place-items: center;
+  z-index: 50;
+}
+
+.dialog {
+  background: var(--panel);
+  border-radius: 10px;
+  padding: 16px;
+  min-width: 320px;
+  max-width: 90vw;
+  box-shadow: 0 10px 40px rgb(0 0 0 / 30%);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.library-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 50vh;
+  overflow: auto;
+}
+
+.library-list li {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.library-list li[aria-current='true'] {
+  font-weight: 600;
+}
+
+.tooltip {
+  position: fixed;
+  z-index: 60;
+  background: var(--panel);
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  padding: 8px;
+  display: flex;
+  gap: 10px;
+  pointer-events: none;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 20%);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}

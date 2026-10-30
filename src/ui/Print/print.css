@@ -1,0 +1,53 @@
+/* Print view (FR-023, SC-008): A4 and Letter, 15 mm margins, no app chrome. */
+@page {
+  margin: 15mm;
+}
+
+.print-root {
+  display: none;
+  color: #000;
+  background: #fff;
+  --fg: #000;
+  --muted: #000;
+  --print-fg: #000;
+  --hole-open: #fff;
+  --hole-closed: #000;
+  --line-strong: #666;
+}
+
+.print-header h1 {
+  font-size: 20pt;
+  margin: 0 0 2mm;
+  text-align: center;
+}
+
+.print-header p {
+  margin: 0 0 4mm;
+  text-align: center;
+  font-size: 10pt;
+}
+
+.print-system {
+  display: block;
+  max-width: 100%;
+  break-inside: avoid;
+  page-break-inside: avoid;
+  margin-bottom: 3mm;
+}
+
+@media print {
+  html,
+  body,
+  #root {
+    height: auto;
+    background: #fff;
+  }
+
+  .app {
+    display: none !important;
+  }
+
+  .print-root {
+    display: block !important;
+  }
+}

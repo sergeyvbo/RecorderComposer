@@ -1,0 +1,122 @@
+{
+  "app": { "title": "Recorder Composer" },
+  "melody": { "untitled": "Untitled melody" },
+  "panel": {
+    "timeline": "Timeline",
+    "sheet": "Sheet music",
+    "fingering": "Fingering",
+    "group": "Panels"
+  },
+  "toolbar": {
+    "play": "Play",
+    "pause": "Pause",
+    "toStart": "Back to start",
+    "tempo": "Tempo",
+    "bpm": "BPM",
+    "snap": "Snap",
+    "timeSignature": "Time signature",
+    "key": "Key",
+    "transpose": "Transpose…",
+    "undo": "Undo",
+    "redo": "Redo",
+    "library": "Melodies…",
+    "import": "Import…",
+    "exportFile": "Export file",
+    "exportMidi": "Export MIDI",
+    "printSheet": "Print sheet music",
+    "printWithFingering": "Print with fingerings",
+    "language": "Language",
+    "naming": "Note names",
+    "title": "Melody title",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out"
+  },
+  "snap": { "480": "1/4", "240": "1/8", "120": "1/16", "60": "1/32" },
+  "naming": { "letter": "C D E", "solfege": "do re mi" },
+  "lang": { "en": "English", "ru": "Русский" },
+  "key": { "major": "{{tonic}} major", "minor": "{{tonic}} minor" },
+  "edit": {
+    "clampedToNeighbor": "Stopped at the neighbouring note",
+    "shortenedToFit": "Shortened to fit the free space",
+    "noRoom": "No free space here",
+    "clampedToRange": "Limited to the recorder range (C5–D7)",
+    "outOfRange": "Outside the recorder range",
+    "emptySelection": "Nothing selected",
+    "invalidArgs": "This change is not possible"
+  },
+  "playback": {
+    "empty": "Add notes to play the melody",
+    "ruler": "Time ruler — click to move the playback position",
+    "position": "Playback position"
+  },
+  "audio": { "unavailable": "Sound could not be started in this browser" },
+  "transpose": {
+    "title": "Transpose",
+    "byKey": "To key",
+    "bySemitones": "By semitones",
+    "semitones": "Semitones",
+    "scopeAll": "Whole melody",
+    "scopeSelection": "Selected notes",
+    "apply": "Transpose",
+    "cancel": "Cancel",
+    "outOfRange_one": "{{count}} note would leave the recorder range: {{notes}}",
+    "outOfRange_other": "{{count}} notes would leave the recorder range: {{notes}}",
+    "octaveUp": "Transpose an octave higher instead",
+    "octaveDown": "Transpose an octave lower instead",
+    "ok": "All notes stay within the range"
+  },
+  "storage": {
+    "unavailable": "Saving in this browser is unavailable — changes are not being saved. Export your melody to a file.",
+    "quota": "Browser storage is full — changes are not being saved. Export your melody to a file.",
+    "saving": "Saving…",
+    "saved": "All changes saved",
+    "exportNow": "Export now"
+  },
+  "import": {
+    "notJson": "This file is not a melody file (not valid JSON).",
+    "wrongFormat": "This file is not a Recorder Composer melody.",
+    "newerVersion": "This file was made by a newer version of Recorder Composer.",
+    "invalid": "This melody file is damaged or invalid.",
+    "done": "Melody imported"
+  },
+  "library": {
+    "title": "Melodies",
+    "new": "New melody",
+    "open": "Open",
+    "rename": "Rename",
+    "duplicate": "Duplicate",
+    "delete": "Delete",
+    "close": "Close",
+    "confirmDelete": "Delete “{{title}}”? This cannot be undone.",
+    "copyOf": "{{title}} (copy)",
+    "empty": "No melodies yet",
+    "updated": "Changed {{date}}",
+    "renamePrompt": "New title"
+  },
+  "export": { "emptyMidi": "Add notes before exporting MIDI" },
+  "print": {
+    "empty": "Add notes before printing",
+    "tempo": "♩ = {{bpm}}"
+  },
+  "fingering": {
+    "diagram": "Fingering for {{note}}",
+    "alternates": "Alternative fingerings",
+    "thumb": "Thumb hole",
+    "alt": {
+      "alternative": "Alternative",
+      "trill": "For trills",
+      "intonation": "Better intonation"
+    }
+  },
+  "note": {
+    "octave": {
+      "russian": {
+        "1": "{{name}} of the first octave",
+        "2": "{{name}} of the second octave",
+        "3": "{{name}} of the third octave"
+      },
+      "scientific": "{{name}}{{octave}}"
+    }
+  },
+  "dialog": { "ok": "OK", "cancel": "Cancel" }
+}

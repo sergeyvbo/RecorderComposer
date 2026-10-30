@@ -1,0 +1,105 @@
+{
+  "format": "recorder-composer",
+  "formatVersion": 1,
+  "melody": {
+    "id": "11111111-1111-4111-8111-111111111111",
+    "title": "Twinkle",
+    "tempoBpm": 100,
+    "timeSignature": {
+      "beats": 4,
+      "beatUnit": 4
+    },
+    "key": {
+      "tonic": "C",
+      "mode": "major"
+    },
+    "notes": [
+      {
+        "id": "n1",
+        "pitch": 72,
+        "start": 0,
+        "duration": 480
+      },
+      {
+        "id": "n2",
+        "pitch": 72,
+        "start": 480,
+        "duration": 480
+      },
+      {
+        "id": "n3",
+        "pitch": 79,
+        "start": 960,
+        "duration": 480
+      },
+      {
+        "id": "n4",
+        "pitch": 79,
+        "start": 1440,
+        "duration": 480
+      },
+      {
+        "id": "n5",
+        "pitch": 81,
+        "start": 1920,
+        "duration": 480
+      },
+      {
+        "id": "n6",
+        "pitch": 81,
+        "start": 2400,
+        "duration": 480
+      },
+      {
+        "id": "n7",
+        "pitch": 79,
+        "start": 2880,
+        "duration": 960
+      },
+      {
+        "id": "n8",
+        "pitch": 77,
+        "start": 3840,
+        "duration": 480
+      },
+      {
+        "id": "n9",
+        "pitch": 77,
+        "start": 4320,
+        "duration": 480
+      },
+      {
+        "id": "n10",
+        "pitch": 76,
+        "start": 4800,
+        "duration": 480
+      },
+      {
+        "id": "n11",
+        "pitch": 76,
+        "start": 5280,
+        "duration": 480
+      },
+      {
+        "id": "n12",
+        "pitch": 74,
+        "start": 5760,
+        "duration": 480
+      },
+      {
+        "id": "n13",
+        "pitch": 74,
+        "start": 6240,
+        "duration": 480
+      },
+      {
+        "id": "n14",
+        "pitch": 72,
+        "start": 6720,
+        "duration": 960
+      }
+    ],
+    "createdAt": "2026-10-29T10:00:00.000Z",
+    "updatedAt": "2026-10-29T10:00:00.000Z"
+  }
+}

@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://recorder-composer.local/schemas/melody-file-v1.json",
+  "title": "Recorder Composer melody file, formatVersion 1",
+  "description": "Used for file export/import (.rcm.json) and as the stored document in IndexedDB. Invariants that JSON Schema cannot express (monophony, sorted notes, unique note ids) are checked by the domain validator after schema validation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "formatVersion", "melody"],
+  "properties": {
+    "format": { "const": "recorder-composer" },
+    "formatVersion": { "const": 1 },
+    "melody": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "tempoBpm", "timeSignature", "key", "notes", "createdAt", "updatedAt"],
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "tempoBpm": { "type": "integer", "minimum": 30, "maximum": 240 },
+        "timeSignature": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["beats", "beatUnit"],
+          "properties": {
+            "beats": { "type": "integer" },
+            "beatUnit": { "type": "integer" }
+          },
+          "oneOf": [
+            { "properties": { "beats": { "const": 2 }, "beatUnit": { "const": 4 } } },
+            { "properties": { "beats": { "const": 3 }, "beatUnit": { "const": 4 } } },
+            { "properties": { "beats": { "const": 4 }, "beatUnit": { "const": 4 } } },
+            { "properties": { "beats": { "const": 6 }, "beatUnit": { "const": 8 } } }
+          ]
+        },
+        "key": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["tonic", "mode"],
+          "properties": {
+            "tonic": { "type": "string" },
+            "mode": { "enum": ["major", "minor"] }
+          },
+          "oneOf": [
+            { "properties": { "mode": { "const": "major" }, "tonic": { "enum": ["C", "G", "D", "A", "E", "F", "Bb", "Eb", "Ab"] } } },
+            { "properties": { "mode": { "const": "minor" }, "tonic": { "enum": ["A", "E", "B", "F#", "C#", "D", "G", "C", "F"] } } }
+          ]
+        },
+        "notes": {
+          "type": "array",
+          "maxItems": 5000,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "pitch", "start", "duration"],
+            "properties": {
+              "id": { "type": "string", "minLength": 1, "maxLength": 64 },
+              "pitch": { "type": "integer", "minimum": 72, "maximum": 98 },
+              "start": { "type": "integer", "minimum": 0, "multipleOf": 60 },
+              "duration": { "type": "integer", "minimum": 60, "multipleOf": 60 }
+            }
+          }
+        },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "examples": [
+    {
+      "format": "recorder-composer",
+      "formatVersion": 1,
+      "melody": {
+        "id": "6f1c2a1e-6d0b-4f7e-9a51-2a3f0e0c9b11",
+        "title": "Twinkle (opening)",
+        "tempoBpm": 100,
+        "timeSignature": { "beats": 4, "beatUnit": 4 },
+        "key": { "tonic": "C", "mode": "major" },
+        "notes": [
+          { "id": "n1", "pitch": 72, "start": 0, "duration": 480 },
+          { "id": "n2", "pitch": 72, "start": 480, "duration": 480 },
+          { "id": "n3", "pitch": 79, "start": 960, "duration": 480 },
+          { "id": "n4", "pitch": 79, "start": 1440, "duration": 480 }
+        ],
+        "createdAt": "2026-10-29T10:00:00Z",
+        "updatedAt": "2026-10-29T10:05:00Z"
+      }
+    }
+  ]
+}
