@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   addNote,
   deleteNotes,
+  duplicateNotes,
   moveNotes,
   pasteNotes,
   resizeNote,
@@ -58,6 +59,46 @@ describe('addNote', () => {
       ok: false,
       reason: 'noRoom',
     });
+  });
+});
+
+describe('duplicateNotes (Ctrl/Cmd-drag copy)', () => {
+  const m = melodyWith([
+    { id: 'a', pitch: 72, start: 0, duration: Q, mark: 'staccato', slurNext: true },
+    { id: 'b', pitch: 76, start: Q, duration: Q },
+    { id: 'c', pitch: 79, start: 4 * Q, duration: Q },
+  ]);
+
+  it('places copies in free space and keeps the originals, marks and the slur between copies', () => {
+    const r = ok(duplicateNotes(m, ['a', 'b'], { dTicks: 2 * Q, dPitch: 2, snap: S }, { newId: idGen('k') }));
+    expect(r.ids).toEqual(['k1', 'k2']);
+    expect(r.melody.notes).toEqual([
+      ...m.notes.slice(0, 2),
+      { id: 'k1', pitch: 74, start: 2 * Q, duration: Q, mark: 'staccato', slurNext: true },
+      { id: 'k2', pitch: 78, start: 3 * Q, duration: Q },
+      m.notes[2],
+    ]);
+  });
+
+  it('does not copy a slur onto a note that is not copied', () => {
+    const r = ok(duplicateNotes(m, ['a'], { dTicks: 2 * Q, dPitch: 0, snap: S }, { newId: idGen('k') }));
+    expect(byId(r.melody, 'k1')).toEqual({ id: 'k1', pitch: 72, start: 2 * Q, duration: Q, mark: 'staccato' });
+    expect(byId(r.melody, 'a').slurNext).toBe(true);
+  });
+
+  it('a single copy is shortened to the free gap; on another note it stays at the last valid place', () => {
+    const short = ok(duplicateNotes(m, ['b'], { dTicks: 2.5 * Q, dPitch: 0, snap: S }, { newId: idGen('k') }));
+    expect(byId(short.melody, 'k1')).toMatchObject({ start: 3.5 * Q, duration: Q / 2 });
+    const kept = ok(
+      duplicateNotes(m, ['a'], { dTicks: 4 * Q, dPitch: 0, snap: S, lastValid: { dTicks: 2 * Q, dPitch: 0 } }, { newId: idGen('k') }),
+    );
+    expect(byId(kept.melody, 'k1').start).toBe(2 * Q);
+  });
+
+  it('refuses with noRoom when there is nowhere to put the copies', () => {
+    expect(duplicateNotes(m, ['a'], { dTicks: S, dPitch: 0, snap: S }, { newId: idGen() })).toEqual({ ok: false, reason: 'noRoom' });
+    expect(duplicateNotes(m, ['a', 'b', 'c'], { dTicks: Q, dPitch: 0, snap: S }, { newId: idGen() })).toEqual({ ok: false, reason: 'noRoom' });
+    expect(duplicateNotes(m, [], { dTicks: Q, dPitch: 0, snap: S }, { newId: idGen() })).toEqual({ ok: false, reason: 'emptySelection' });
   });
 });
 

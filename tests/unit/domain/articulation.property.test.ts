@@ -1,13 +1,13 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 import { deriveSlurs, setLegato, setMark } from '@/domain/articulation';
-import { addNote, deleteNotes, moveNotes, pasteNotes, resizeNote, type ClipboardNote } from '@/domain/commands';
+import { addNote, deleteNotes, duplicateNotes, moveNotes, pasteNotes, resizeNote, type ClipboardNote } from '@/domain/commands';
 import { checkInvariants } from '@/domain/invariants';
 import { createEmptyMelody, SNAP_VALUES, type EditResult, type Melody } from '@/domain/types';
 
 type Op =
   | { k: 'add'; pitch: number; start: number; duration: number; snap: number }
-  | { k: 'move'; pick: number[]; dTicks: number; dPitch: number; snap: number }
+  | { k: 'move' | 'copy'; pick: number[]; dTicks: number; dPitch: number; snap: number }
   | { k: 'resize'; pick: number; edge: 'start' | 'end'; toTick: number; snap: number }
   | { k: 'delete'; pick: number[] }
   | { k: 'paste'; pick: number[]; at: number; snap: number }
@@ -19,7 +19,7 @@ const tick = fc.integer({ min: 0, max: 8000 });
 const pick = fc.array(fc.nat(30), { maxLength: 4 });
 const op: fc.Arbitrary<Op> = fc.oneof(
   { arbitrary: fc.record({ k: fc.constant('add' as const), pitch: fc.integer({ min: 72, max: 98 }), start: tick, duration: fc.integer({ min: 60, max: 1500 }), snap }), weight: 5 },
-  fc.record({ k: fc.constant('move' as const), pick, dTicks: fc.integer({ min: -3000, max: 3000 }), dPitch: fc.integer({ min: -5, max: 5 }), snap }),
+  fc.record({ k: fc.constantFrom('move' as const, 'copy' as const), pick, dTicks: fc.integer({ min: -3000, max: 3000 }), dPitch: fc.integer({ min: -5, max: 5 }), snap }),
   fc.record({ k: fc.constant('resize' as const), pick: fc.nat(30), edge: fc.constantFrom('start' as const, 'end' as const), toTick: tick, snap }),
   fc.record({ k: fc.constant('delete' as const), pick }),
   fc.record({ k: fc.constant('paste' as const), pick, at: tick, snap }),
@@ -63,6 +63,9 @@ function check(ops: Op[]) {
         break;
       case 'move':
         r = moveNotes(m, ids(o.pick), { dTicks: o.dTicks, dPitch: o.dPitch, snap: o.snap as never });
+        break;
+      case 'copy':
+        r = duplicateNotes(m, ids(o.pick), { dTicks: o.dTicks, dPitch: o.dPitch, snap: o.snap as never }, deps);
         break;
       case 'resize': {
         const target = ids([o.pick])[0];

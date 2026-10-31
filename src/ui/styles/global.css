@@ -289,3 +289,10 @@ button:disabled {
   overflow: hidden;
   clip: rect(0 0 0 0);
 }
+
+/* While a note is dragged (move or Ctrl/Cmd copy), the whole grid shows the move cursor, over the
+   notes' own grab and resize cursors too. */
+.timeline-moving,
+.timeline-moving * {
+  cursor: move !important;
+}

@@ -56,6 +56,52 @@ describe('Timeline (US1 primary flow)', () => {
   });
 });
 
+describe('Timeline Ctrl/Cmd-drag copy', () => {
+  const rowY = (p: number) => (98 - p) * ROW_HEIGHT + ROW_HEIGHT / 2;
+  const opts = { button: 0, buttons: 1, pointerType: 'mouse', ctrlKey: true };
+
+  it('copies the selection to free space in one undo step and selects the copies', () => {
+    const { store } = setup(<TimelinePanel />);
+    act(() => store.getState().actions.openMelody(melodyWith([{ id: 'a', pitch: 80, start: 0, duration: 480 }])));
+    const grid = screen.getByTestId('timeline-grid');
+    // 480 ticks = 75 px at the default zoom.
+    fireEvent.pointerDown(screen.getByTestId('note'), { ...opts, clientX: 20, clientY: rowY(80) });
+    expect(grid).not.toHaveClass('timeline-moving');
+    fireEvent.pointerMove(grid, { ...opts, clientX: 20 + 150, clientY: rowY(82) });
+    expect(store.getState().draft?.notes).toHaveLength(2);
+    // The move cursor is shown for the length of the drag.
+    expect(grid).toHaveClass('timeline-moving');
+    fireEvent.pointerUp(grid, { ...opts, clientX: 20 + 150, clientY: rowY(82) });
+    expect(grid).not.toHaveClass('timeline-moving');
+
+    const notes = store.getState().melody.notes;
+    expect(notes.map((n) => [n.pitch, n.start])).toEqual([
+      [80, 0],
+      [82, 960],
+    ]);
+    expect([...store.getState().selection.ids]).toEqual([notes[1]?.id]);
+    expect(store.getState().history.past).toHaveLength(1);
+  });
+
+  it('a Ctrl-click without dragging still toggles the note; a copy with no room is refused', () => {
+    const { store } = setup(<TimelinePanel />);
+    act(() => store.getState().actions.openMelody(melodyWith([{ id: 'a', pitch: 80, start: 0, duration: 480 }])));
+    const grid = screen.getByTestId('timeline-grid');
+    const note = screen.getByTestId('note');
+    fireEvent.pointerDown(note, { ...opts, clientX: 20, clientY: rowY(80) });
+    fireEvent.pointerUp(grid, { ...opts, clientX: 20, clientY: rowY(80) });
+    expect([...store.getState().selection.ids]).toEqual(['a']);
+
+    // A small drag keeps the copy on top of its original: nothing is shown or added.
+    fireEvent.pointerDown(note, { ...opts, clientX: 20, clientY: rowY(80) });
+    fireEvent.pointerMove(grid, { ...opts, clientX: 30, clientY: rowY(80) });
+    expect(store.getState().draft?.notes).toHaveLength(1);
+    fireEvent.pointerUp(grid, { ...opts, clientX: 30, clientY: rowY(80) });
+    expect(store.getState().melody.notes).toHaveLength(1);
+    expect(store.getState().lastEdit.reason).toBe('noRoom');
+  });
+});
+
 describe('Timeline articulation (002 FR-009, FR-019)', () => {
   it('shows marks, joins slurred notes with an arc and names both in the accessible label', () => {
     const { store } = setup(<TimelinePanel />);

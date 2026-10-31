@@ -22,7 +22,7 @@ export function TimelinePanel() {
   const playingId = useApp((s) => s.playback.playingNoteId);
   const snap = useApp((s) => s.prefs.snapTicks);
   const { short } = useNoteName();
-  const { box, handlers } = useTimelineGestures(axis, ROW_HEIGHT);
+  const { box, moving, handlers } = useTimelineGestures(axis, ROW_HEIGHT);
   const height = PITCHES.length * ROW_HEIGHT;
   const margin = axis.width / axis.pxPerTick;
   const visible = melody.notes.filter(
@@ -58,6 +58,7 @@ export function TimelinePanel() {
           role="listbox"
           aria-multiselectable="true"
           aria-label={t('panel.timeline')}
+          className={moving ? 'timeline-moving' : undefined}
           style={{ display: 'block', touchAction: 'none', userSelect: 'none' }}
           {...handlers}
         >

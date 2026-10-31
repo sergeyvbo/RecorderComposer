@@ -1,5 +1,6 @@
 import { useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
-import { addNote, deleteNotes, moveNotes, resizeNote } from '@/domain/commands';
+import { addNote, deleteNotes, duplicateNotes, moveNotes, resizeNote } from '@/domain/commands';
+import { done } from '@/domain/result';
 import { MAX_PITCH, MIN_PITCH, type Melody, type MoveDelta } from '@/domain/types';
 import { defaultDeps } from '@/state/store';
 import type { TimeAxis } from '../Layout/SharedTimeAxis';
@@ -17,6 +18,8 @@ type Drag =
       /** Last delta the command accepted; passed to the next preview and to the commit. */
       lastValid: MoveDelta;
       moved: boolean;
+      /** Ctrl/Cmd-drag: copy instead of move; a click without a drag toggles this note instead. */
+      copyOf?: string;
     }
   | { kind: 'resize'; id: string; edge: 'start' | 'end'; moved: boolean; toTick: number };
 
@@ -32,6 +35,8 @@ export function useTimelineGestures(axis: TimeAxis, rowHeight: number, deps = de
   /** Last pointer position seen during the current drag (grid coordinates). */
   const last = useRef({ x: 0, y: 0 });
   const [box, setBox] = useState<Box | null>(null);
+  /** A note move or copy drag is under way (shown with the `move` cursor). */
+  const [moving, setMoving] = useState(false);
 
   const local = (e: ReactPointerEvent<SVGSVGElement> | React.MouseEvent<SVGSVGElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -46,6 +51,13 @@ export function useTimelineGestures(axis: TimeAxis, rowHeight: number, deps = de
   });
   const moveCmd = (ids: string[], args: MoveDelta, lastValid: MoveDelta) => (m: Melody) =>
     moveNotes(m, ids, { ...args, snap: state().prefs.snapTicks, lastValid });
+  const copyCmd = (ids: string[], args: MoveDelta, lastValid: MoveDelta) => (m: Melody) =>
+    duplicateNotes(m, ids, { ...args, snap: state().prefs.snapTicks, lastValid }, deps);
+  /** While dragging, a copy with nowhere to go is just not shown; the refusal comes on release. */
+  const copyPreviewCmd = (ids: string[], args: MoveDelta, lastValid: MoveDelta) => (m: Melody) => {
+    const r = copyCmd(ids, args, lastValid)(m);
+    return r.ok ? r : done(m, []);
+  };
   const resizeCmd = (id: string, edge: 'start' | 'end', toTick: number) => (m: Melody) =>
     resizeNote(m, id, { edge, toTick, snap: state().prefs.snapTicks });
 
@@ -69,8 +81,8 @@ export function useTimelineGestures(axis: TimeAxis, rowHeight: number, deps = de
     const id = target.getAttribute('data-note-id') as string;
     const handle = (e.target as Element).getAttribute('data-handle') as 'start' | 'end' | null;
     if (e.ctrlKey || e.metaKey) {
-      actions.select([id], 'toggle');
-      drag.current = null;
+      // The copied notes are fixed once the drag starts (see onPointerMove).
+      drag.current = { kind: 'move', x0: x, y0: y, ids: [], lastValid: { dTicks: 0, dPitch: 0 }, moved: false, copyOf: id };
       return;
     }
     if (e.shiftKey) actions.select([id], 'add');
@@ -112,8 +124,15 @@ export function useTimelineGestures(axis: TimeAxis, rowHeight: number, deps = de
     }
     if (d.kind === 'move') {
       if (!d.moved && Math.hypot(x - d.x0, y - d.y0) < DRAG_THRESHOLD) return;
+      if (!d.moved && d.copyOf) {
+        // Dragging an unselected note copies it along with the selection.
+        if (!state().selection.ids.has(d.copyOf)) actions.select([d.copyOf], 'add');
+        d.ids = [...state().selection.ids];
+      }
       d.moved = true;
-      const r = actions.preview(moveCmd(d.ids, moveDelta(d, x, y), d.lastValid));
+      setMoving(true);
+      const cmd = d.copyOf ? copyPreviewCmd : moveCmd;
+      const r = actions.preview(cmd(d.ids, moveDelta(d, x, y), d.lastValid));
       if (r.ok && r.applied) d.lastValid = r.applied;
       return;
     }
@@ -144,6 +163,7 @@ export function useTimelineGestures(axis: TimeAxis, rowHeight: number, deps = de
   const finish = (x: number, y: number) => {
     const d = drag.current;
     drag.current = null;
+    setMoving(false);
     if (!d) return;
     const { actions, prefs, melody } = state();
     if (d.kind === 'empty') {
@@ -167,9 +187,19 @@ export function useTimelineGestures(axis: TimeAxis, rowHeight: number, deps = de
       return;
     }
     if (d.kind === 'move') {
-      // Recomputed at the release point rather than reusing the last preview's delta.
-      if (d.moved) actions.dispatch(moveCmd(d.ids, moveDelta(d, x, y), d.lastValid));
       actions.endPreview();
+      if (d.copyOf && !d.moved) {
+        actions.select([d.copyOf], 'toggle');
+        return;
+      }
+      if (!d.moved) return;
+      // Recomputed at the release point rather than reusing the last preview's delta.
+      if (!d.copyOf) {
+        actions.dispatch(moveCmd(d.ids, moveDelta(d, x, y), d.lastValid));
+        return;
+      }
+      const r = actions.dispatch(copyCmd(d.ids, moveDelta(d, x, y), d.lastValid));
+      if (r.ok && r.ids) actions.select(r.ids);
       return;
     }
     if (d.moved) actions.dispatch(resizeCmd(d.id, d.edge, d.toTick));
@@ -186,5 +216,5 @@ export function useTimelineGestures(axis: TimeAxis, rowHeight: number, deps = de
     if (!drag.current) state().actions.setHover(null);
   };
 
-  return { box, handlers: { onPointerDown, onPointerMove, onPointerUp, onDoubleClick, onPointerLeave } };
+  return { box, moving, handlers: { onPointerDown, onPointerMove, onPointerUp, onDoubleClick, onPointerLeave } };
 }

@@ -29,6 +29,7 @@ across them.
 | Click empty cell | Add note, default length, at snapped time (FR-002) |
 | Drag note body | Move (time and pitch), clamped (FR-006) |
 | Drag note left/right edge (6 px handle) | Resize, clamped |
+| Ctrl/Cmd-drag note | Copy the selection (plus that note) to where it is dropped, in free space only; marks and slurs between copied notes are kept; the copies become the selection; no free position → refused with “No free space here”; one undo step |
 | Click note | Select only it; Ctrl/Cmd-click toggles; Shift-click extends |
 | Drag on empty area | Box select |
 | Double-click note | Delete |

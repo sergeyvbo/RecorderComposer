@@ -9,9 +9,10 @@ them. Runs entirely in the browser — no server, no account.
 
 ## Features
 
-- **Timeline editor** — click to add notes, drag to move, drag edges to stretch, box/Ctrl/Shift
-  selection, copy/cut/paste, undo/redo (200 steps), snap 1/4…1/32. Melodies are always single-voice
-  and inside the recorder range: a dragged note jumps into free space or stops at its neighbour.
+- **Timeline editor** — click to add notes, drag to move, Ctrl/Cmd-drag to copy, drag edges to
+  stretch, box/Ctrl/Shift selection, copy/cut/paste, undo/redo (200 steps), snap 1/4…1/32.
+  Melodies are always single-voice and inside the recorder range: a dragged note (or copy) jumps
+  into free space or stops at its neighbour.
 - **Sheet music** in treble clef (written an octave below sounding pitch, clef marked 8) and a
   **baroque fingering diagram under every note**, all on one shared, zoomable time axis. Hover a
   diagram for alternate fingerings. Panels are resizable and can be hidden.

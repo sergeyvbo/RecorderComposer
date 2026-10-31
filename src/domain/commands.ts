@@ -160,6 +160,33 @@ function shiftNotes(
   return done(withNotes(m, [...others, ...shifted(fallback)]), adjusted, { applied: { dTicks: fallback, dPitch } });
 }
 
+/**
+ * Ctrl/Cmd-drag copy: copies of the notes go where the drag puts them, keeping marks and the slurs
+ * between them; the originals stay. Same placement rules as moveNotes, but a copy never lands on
+ * its original, so with no free position the command fails with `noRoom`.
+ */
+export function duplicateNotes(
+  m: Melody,
+  ids: readonly string[],
+  args: MoveDelta & { snap: SnapTicks; lastValid?: MoveDelta },
+  deps: CommandDeps,
+): EditResult {
+  const idSet = new Set(ids);
+  const sel = m.notes.flatMap((n, i) => (idSet.has(n.id) ? [{ n, i }] : []));
+  if (sel.length === 0) return fail('emptySelection');
+  const copies = sel.map(({ n, i }, k) => {
+    const c: Note = { id: deps.newId(), pitch: n.pitch, start: n.start, duration: n.duration };
+    if (n.mark) c.mark = n.mark;
+    // Keep a slur link only to the next copied note, and only if it is the melody successor.
+    if (n.slurNext && sel[k + 1]?.i === i + 1) c.slurNext = true;
+    return c;
+  });
+  const fresh = copies.map((c) => c.id);
+  const r = shiftNotes(withNotes(m, [...m.notes, ...copies]), fresh, args);
+  if (!r.ok || !r.applied || r.applied.dTicks === 0) return fail('noRoom');
+  return keepSlurs(m, { ...r, ids: fresh }, fresh);
+}
+
 export function resizeNote(
   m: Melody,
   id: string,

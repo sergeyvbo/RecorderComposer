@@ -1,12 +1,12 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import { addNote, deleteNotes, moveNotes, pasteNotes, resizeNote } from '@/domain/commands';
+import { addNote, deleteNotes, duplicateNotes, moveNotes, pasteNotes, resizeNote } from '@/domain/commands';
 import { checkInvariants } from '@/domain/invariants';
 import { createEmptyMelody, SNAP_VALUES, type Melody } from '@/domain/types';
 
 type Op =
   | { k: 'add'; pitch: number; start: number; duration: number; snap: number }
-  | { k: 'move'; pick: number[]; dTicks: number; dPitch: number; snap: number; useLast: boolean }
+  | { k: 'move' | 'copy'; pick: number[]; dTicks: number; dPitch: number; snap: number; useLast: boolean }
   | { k: 'resize'; pick: number; edge: 'start' | 'end'; toTick: number; snap: number }
   | { k: 'delete'; pick: number[] }
   | { k: 'paste'; pick: number[]; at: number; snap: number };
@@ -15,7 +15,7 @@ const snap = fc.constantFrom(...SNAP_VALUES);
 const tick = fc.integer({ min: -2000, max: 12000 });
 const op: fc.Arbitrary<Op> = fc.oneof(
   { arbitrary: fc.record({ k: fc.constant('add' as const), pitch: fc.integer({ min: 50, max: 120 }), start: tick, duration: fc.integer({ min: -100, max: 4000 }), snap }), weight: 6 },
-  fc.record({ k: fc.constant('move' as const), pick: fc.array(fc.nat(30), { maxLength: 4 }), dTicks: fc.integer({ min: -5000, max: 5000 }), dPitch: fc.integer({ min: -40, max: 40 }), snap, useLast: fc.boolean() }),
+  fc.record({ k: fc.constantFrom('move' as const, 'copy' as const), pick: fc.array(fc.nat(30), { maxLength: 4 }), dTicks: fc.integer({ min: -5000, max: 5000 }), dPitch: fc.integer({ min: -40, max: 40 }), snap, useLast: fc.boolean() }),
   fc.record({ k: fc.constant('resize' as const), pick: fc.nat(30), edge: fc.constantFrom('start' as const, 'end' as const), toTick: tick, snap }),
   fc.record({ k: fc.constant('delete' as const), pick: fc.array(fc.nat(30), { maxLength: 3 }) }),
   fc.record({ k: fc.constant('paste' as const), pick: fc.array(fc.nat(30), { maxLength: 3 }), at: tick, snap }),
@@ -34,6 +34,9 @@ function run(ops: Op[]): Melody {
         break;
       case 'move':
         r = moveNotes(m, ids(o.pick), { dTicks: o.dTicks, dPitch: o.dPitch, snap: o.snap as never, ...(o.useLast ? { lastValid: { dTicks: 0, dPitch: 0 } } : {}) });
+        break;
+      case 'copy':
+        r = duplicateNotes(m, ids(o.pick), { dTicks: o.dTicks, dPitch: o.dPitch, snap: o.snap as never, ...(o.useLast ? { lastValid: { dTicks: 0, dPitch: 0 } } : {}) }, deps);
         break;
       case 'resize': {
         const target = ids([o.pick])[0];
