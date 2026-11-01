@@ -5,6 +5,15 @@ export type Language = 'en' | 'ru';
 export type PanelId = 'timeline' | 'sheet' | 'fingering';
 export const PANEL_IDS: readonly PanelId[] = ['timeline', 'sheet', 'fingering'];
 
+export type RibbonTabId = 'home' | 'melody' | 'file' | 'view';
+export const RIBBON_TABS: readonly RibbonTabId[] = ['home', 'melody', 'file', 'view'];
+
+/** Selected ribbon tab and whether the ribbon is collapsed to its tab row (003 FR-012). */
+export interface RibbonPrefs {
+  tab: RibbonTabId;
+  collapsed: boolean;
+}
+
 export interface PanelPrefs {
   visible: boolean;
   /** Percentage of the workspace height. */
@@ -20,6 +29,7 @@ export interface Preferences {
   defaultNoteTicks: number;
   pxPerTick: number;
   lastMelodyId: string | null;
+  ribbon: RibbonPrefs;
 }
 
 /** ~4 bars of 4/4 in a 1200 px viewport. */
@@ -41,6 +51,7 @@ export function defaultPreferences(language: Language): Preferences {
     defaultNoteTicks: PPQ,
     pxPerTick: DEFAULT_PX_PER_TICK,
     lastMelodyId: null,
+    ribbon: { tab: 'home', collapsed: false },
   };
 }
 

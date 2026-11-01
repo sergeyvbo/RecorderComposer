@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { writeFileSync } from 'node:fs';
-import { clickCell, noteCount, openFresh } from './helpers';
+import { clickCell, noteCount, openFresh, openTab } from './helpers';
 
 // quickstart.md scenario 4
 test('auto-save survives a reload; export, delete and import round-trip', async ({ page }, info) => {
@@ -17,6 +17,7 @@ test('auto-save survives a reload; export, delete and import round-trip', async 
 
   // Export to a file.
   const downloadPromise = page.waitForEvent('download');
+  await openTab(page, 'File');
   await page.getByRole('button', { name: 'Export file' }).click();
   const download = await downloadPromise;
   expect(download.suggestedFilename()).toBe('Round trip.rcm.json');

@@ -109,6 +109,7 @@ input[type='number'] {
 
 button:disabled {
   opacity: 0.45;
+  color: var(--muted);
 }
 
 :focus-visible {
@@ -120,27 +121,6 @@ button:disabled {
   display: flex;
   flex-direction: column;
   height: 100%;
-}
-
-.toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 10px;
-  border-bottom: 1px solid var(--line);
-  background: var(--panel);
-}
-
-.toolbar-group {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.toolbar-group + .toolbar-group {
-  padding-left: 8px;
-  border-left: 1px solid var(--line);
 }
 
 .toggle[aria-pressed='true'] {
@@ -212,14 +192,6 @@ button:disabled {
   display: flex;
   gap: 12px;
   align-items: center;
-}
-
-.statusbar {
-  font-size: 12px;
-  color: var(--muted);
-  padding: 2px 10px;
-  border-top: 1px solid var(--line);
-  background: var(--panel);
 }
 
 .dialog-backdrop {
@@ -295,4 +267,373 @@ button:disabled {
 .timeline-moving,
 .timeline-moving * {
   cursor: move !important;
+}
+
+/* ---- Title bar and ribbon (003 contracts/ui-contract.md) ---- */
+
+.titlebar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 32px;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0 10px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+}
+
+.titlebar-app {
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.titlebar input[type='text'] {
+  flex: 0 1 14em;
+  width: 14em !important;
+  min-width: 5em;
+  padding: 2px 6px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+}
+
+.titlebar input[type='text']:hover,
+.titlebar input[type='text']:focus {
+  border-color: var(--line-strong);
+  background: var(--bg);
+}
+
+.quick-access {
+  display: flex;
+  gap: 2px;
+}
+
+.titlebar-spacer {
+  flex: 1;
+}
+
+.titlebar .hint {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.quick-access,
+.titlebar-app {
+  flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+  .titlebar-app {
+    display: none;
+  }
+}
+
+.ribbon {
+  position: relative;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  padding: 0 8px;
+  z-index: 20;
+}
+
+.ribbon-tabs {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 28px;
+}
+
+[role='tablist'] {
+  display: flex;
+  gap: 2px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.ribbon-tab {
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  min-height: 26px;
+  padding: 2px 12px;
+  white-space: nowrap;
+}
+
+.ribbon-tab:hover {
+  color: var(--accent);
+}
+
+.ribbon-tab[aria-selected='true'] {
+  border-bottom-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.ribbon-body {
+  padding: 3px 0 2px;
+}
+
+.ribbon-body[hidden],
+.ribbon-panel[hidden] {
+  display: none;
+}
+
+/* Collapsed ribbon: a tab's panel opens over the workspace (FR-011). */
+.ribbon-popup {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line-strong);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 22%);
+  padding: 3px 8px 2px;
+}
+
+.ribbon-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 4px;
+  min-width: 0;
+}
+
+.ribbon-group {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0 4px 0 0;
+  border-right: 1px solid var(--line);
+}
+
+.ribbon-group:last-child {
+  border-right: none;
+}
+
+.ribbon-group-items {
+  display: grid;
+  grid-template-rows: repeat(3, 21px);
+  grid-auto-flow: column;
+  grid-auto-columns: max-content;
+  column-gap: 2px;
+  row-gap: 0;
+  align-items: center;
+  flex: 1;
+}
+
+.ribbon-group-caption {
+  font-size: 11px;
+  line-height: 14px;
+  color: var(--muted);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.rb-wrap {
+  display: inline-flex;
+}
+
+.rb-wrap-large {
+  grid-row: span 3;
+}
+
+.rb {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  white-space: nowrap;
+}
+
+.rb:hover:not(:disabled) {
+  background: var(--bg);
+  border-color: var(--line);
+}
+
+.rb:disabled {
+  pointer-events: none;
+}
+
+.rb-small {
+  height: 21px;
+  padding: 0 4px;
+}
+
+.rb-large {
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+  height: 63px;
+  min-width: 44px;
+  padding: 2px 4px;
+}
+
+.rb-large .rb-label {
+  max-width: 7em;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.15;
+}
+
+.rb-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rb-icon svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2;
+}
+
+.rb-large .rb-icon svg {
+  width: 26px;
+  height: 26px;
+  stroke-width: 1.6;
+}
+
+.rb-icon .artic-glyph {
+  font-size: 18px;
+  height: 14px;
+}
+
+.rb.toggle[aria-pressed='true'] .rb-icon,
+.rb.toggle[aria-pressed='true'] .rb-label {
+  color: var(--accent-fg);
+}
+
+.ribbon-field {
+  grid-row: span 3;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  padding: 0 4px;
+}
+
+.rf-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.rf-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.rf-unit {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.ribbon-field select,
+.ribbon-field input[type='number'] {
+  min-height: 26px;
+  padding: 2px 6px;
+}
+
+.ribbon-group.folded {
+  justify-content: center;
+}
+
+.ribbon-group-button .rb-label {
+  font-size: 12px;
+}
+
+.ribbon-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 30;
+  background: var(--panel);
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 22%);
+  padding: 4px 6px;
+}
+
+.ribbon-measure {
+  position: absolute;
+  left: -10000px;
+  top: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.ribbon-measure-item {
+  display: flex;
+  width: max-content;
+}
+
+.ribbon-tooltip {
+  position: fixed;
+  z-index: 60;
+  max-width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--panel);
+  color: var(--fg);
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 12px;
+  pointer-events: none;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 20%);
+}
+
+.tip-reason {
+  color: var(--muted);
+}
+
+/* Refusal messages and warnings, top-centre of the workspace, never over the ribbon (FR-014). */
+.edit-toast {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  pointer-events: none;
+}
+
+.edit-toast .hint:not(:empty) {
+  background: var(--panel);
+  color: var(--fg);
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  padding: 4px 10px;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 18%);
+  min-width: 0;
+}
+
+.floating-alert {
+  position: fixed;
+  top: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 40;
+  border-radius: 6px;
+}
+
+.rb.toggle[aria-pressed='true']:hover {
+  background: var(--accent);
 }

@@ -64,3 +64,30 @@ test('articulation commands on an articulated 500-note melody render in under 10
   });
   expect(Math.max(...times)).toBeLessThan(100);
 });
+
+// 003 SC-002 and SC-003: ribbon height share at 1280×720, and tab switches under 100 ms.
+test('the ribbon stays compact and switches tabs in under 100 ms', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await openFresh(page);
+  const chromeHeight = () => page.evaluate(() => document.querySelector('.ribbon')!.getBoundingClientRect().bottom);
+  expect(await chromeHeight()).toBeLessThanOrEqual(720 * 0.2);
+
+  const times = await page.evaluate(async () => {
+    const tabs = [...document.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    const out: number[] = [];
+    for (let i = 0; i < 12; i++) {
+      const t0 = performance.now();
+      tabs[i % tabs.length]!.click();
+      document.body.getBoundingClientRect();
+      out.push(performance.now() - t0);
+      await new Promise((r) => setTimeout(r, 0));
+    }
+    return out;
+  });
+  expect(Math.max(...times)).toBeLessThan(100);
+
+  await page.getByRole('tab', { name: 'Home' }).click();
+  await page.getByRole('tab', { name: 'Home' }).dblclick();
+  await expect(page.getByRole('tabpanel')).toHaveCount(0);
+  expect(await chromeHeight()).toBeLessThanOrEqual(720 * 0.1);
+});

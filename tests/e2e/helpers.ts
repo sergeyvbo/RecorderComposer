@@ -29,3 +29,14 @@ export async function clickCell(page: Page, pitch: number, x: number) {
 export async function noteCount(page: Page) {
   return page.getByTestId('note').count();
 }
+
+/** Select a ribbon tab by its visible name (003 contracts/ui-contract.md). */
+export async function openTab(page: Page, name: string) {
+  await page.getByRole('tab', { name, exact: true }).click();
+}
+
+/** The ribbon's visible tab panel (only the selected one is not hidden). */
+export const tabPanel = (page: Page) => page.getByRole('tabpanel');
+
+/** The title bar's quick-access strip: Undo, Redo and Play/Pause on every tab. */
+export const quickAccess = (page: Page) => page.getByRole('toolbar', { name: 'Quick access' });

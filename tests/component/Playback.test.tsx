@@ -8,10 +8,12 @@ import { PPQ, type Note } from '@/domain/types';
 import { melodyWith } from '../unit/domain/helpers';
 import { PlaybackProvider } from '@/ui/playbackContext';
 import { TimeRuler } from '@/ui/Layout/TimeRuler';
-import { TransportControls } from '@/ui/Toolbar/TransportControls';
+import { RibbonDialogsProvider } from '@/ui/commands/dialogs';
+import { LibraryProvider } from '@/ui/libraryContext';
+import { Ribbon } from '@/ui/Ribbon/Ribbon';
 import { useShortcuts } from '@/ui/useShortcuts';
 import { usePlaybackController } from '@/ui/playbackContext';
-import { setup } from './renderApp';
+import { fakeLibrary, setup } from './renderApp';
 
 function mockPlayer(): Player {
   return {
@@ -39,11 +41,15 @@ function renderWithPlayer() {
 
 function PlaybackProviderLazy({ player, onController }: { player: Player; onController: (c: ReturnType<typeof createPlaybackController>) => void }) {
   return (
-    <PlaybackProvider player={player} onController={onController}>
-      <TransportControls />
-      <TimeRuler />
-      <Shortcuts />
-    </PlaybackProvider>
+    <LibraryProvider library={fakeLibrary()}>
+      <PlaybackProvider player={player} onController={onController}>
+        <RibbonDialogsProvider>
+          <Ribbon />
+          <TimeRuler />
+          <Shortcuts />
+        </RibbonDialogsProvider>
+      </PlaybackProvider>
+    </LibraryProvider>
   );
 }
 

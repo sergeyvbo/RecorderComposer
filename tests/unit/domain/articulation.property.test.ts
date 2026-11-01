@@ -1,7 +1,7 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 import { deriveSlurs, setLegato, setMark } from '@/domain/articulation';
-import { addNote, deleteNotes, duplicateNotes, moveNotes, pasteNotes, resizeNote, type ClipboardNote } from '@/domain/commands';
+import { addNote, deleteNotes, duplicateNotes, moveNotes, pasteInsertionTick, pasteNotes, resizeNote, type ClipboardNote } from '@/domain/commands';
 import { checkInvariants } from '@/domain/invariants';
 import { createEmptyMelody, SNAP_VALUES, type EditResult, type Melody } from '@/domain/types';
 
@@ -85,7 +85,7 @@ function check(ops: Op[]) {
           ...(n.mark ? { mark: n.mark } : {}),
           ...(n.slurNext && i < sel.length - 1 ? { slurNext: true as const } : {}),
         }));
-        r = pasteNotes(m, clip, o.at, o.snap as never, deps);
+        r = pasteNotes(m, clip, pasteInsertionTick(m, new Set(ids(o.pick)), o.at, o.snap as never), deps);
         break;
       }
       case 'mark':

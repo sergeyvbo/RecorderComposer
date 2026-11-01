@@ -5,6 +5,10 @@ below are the canonical ones used by tests.
 
 ## Layout
 
+> **Superseded by 003:** the toolbar box below is now a title bar plus an Office-style ribbon. See
+> [003 ui-contract](../../003-ribbon-toolbar/contracts/ui-contract.md). Panels, pointer
+> interactions and shortcuts below still apply.
+
 ```text
 ┌ Toolbar ───────────────────────────────────────────────────────────────────────┐
 │ ▶/❚❚  Tempo [100] BPM  Snap [1/16]  Key [C major]  Time [4/4]  Transpose…        │
@@ -46,7 +50,7 @@ across them.
 | Home | Move playhead to start |
 | Delete / Backspace | Delete selection |
 | Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z (Ctrl+Y) | Undo / Redo |
-| Ctrl/Cmd+A, C, X, V | Select all, copy, cut, paste at playhead |
+| Ctrl/Cmd+A, C, X, V | Select all, copy, cut, paste. Paste inserts right after the selected notes, or at the playhead when nothing is selected (Escape, Home, Ctrl+V pastes at the start); later notes move right to make room, and the pasted notes become the selection |
 | ↑ / ↓ | Selection pitch ±1 semitone (Shift: ±1 octave) |
 | ← / → | Selection time ± one grid step |
 | Esc | Clear selection |
@@ -60,7 +64,7 @@ quality constraints).
 |-----|------|
 | `edit.clampedToNeighbor` | Move/resize stopped at a neighbour (transient hint) |
 | `edit.shortenedToFit` | Moved/added/pasted note shortened to fit a free gap |
-| `edit.noRoom` | Add/paste refused, no free gap |
+| `edit.noRoom` | Add/move/copy-drag refused, no free gap (paste always makes room) |
 | `edit.clampedToRange` | Pitch limited to C5–D7 |
 | `transpose.outOfRange` | Lists affected notes, offers octave up/down or cancel (FR-028) |
 | `storage.unavailable`, `storage.quota` | Persistent banner (edge case) |

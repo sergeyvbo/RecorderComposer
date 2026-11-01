@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
-import { clickCell, openFresh } from './helpers';
+import { clickCell, openFresh, openTab } from './helpers';
 
 async function stubPrint(page: Page) {
   await page.addInitScript(() => {
@@ -14,6 +14,7 @@ test('print view in both modes: title, systems, fingerings, no app chrome', asyn
   await openFresh(page);
   for (const [i, p] of [72, 74, 76, 77, 79, 81, 83, 84, 86, 88, 89, 91].entries()) await clickCell(page, p, i * 75 + 5);
 
+  await openTab(page, 'File');
   await page.getByRole('button', { name: 'Print sheet music' }).click();
   const view = page.getByTestId('print-view');
   await expect(view).toHaveAttribute('data-mode', 'sheet');
@@ -26,6 +27,9 @@ test('print view in both modes: title, systems, fingerings, no app chrome', asyn
   await page.emulateMedia({ media: 'print' });
   await expect(view.getByRole('heading', { level: 1 })).toBeVisible();
   await expect(page.locator('.app')).toBeHidden();
+  // No title bar or ribbon in print (003 FR-015).
+  await expect(page.locator('.titlebar')).toBeHidden();
+  await expect(page.locator('.ribbon')).toBeHidden();
   expect(await page.getByTestId('print-system').count()).toBeGreaterThanOrEqual(1);
 });
 
@@ -38,6 +42,7 @@ for (const [paper, widthMm, heightMm] of [
     await openFresh(page);
     await page.getByTestId('import-input').setInputFiles('tests/fixtures/print-32-bars.rcm.json');
     await expect(page.getByTestId('note').first()).toBeVisible();
+    await openTab(page, 'File');
     await page.getByRole('button', { name: 'Print with fingerings' }).click();
     await page.emulateMedia({ media: 'print' });
     const mmToPx = 96 / 25.4;
@@ -74,6 +79,7 @@ test('print shows marks in both modes and splits a slur at system breaks', async
   const noteCount = (JSON.parse(readFileSync('tests/fixtures/print-32-bars.rcm.json', 'utf-8')) as { melody: { notes: unknown[] } })
     .melody.notes.length;
 
+  await openTab(page, 'File');
   for (const name of ['Print sheet music', 'Print with fingerings']) {
     await page.getByRole('button', { name }).click();
     const view = page.getByTestId('print-view');

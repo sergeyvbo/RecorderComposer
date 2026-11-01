@@ -4,6 +4,7 @@ import {
   deleteNotes,
   duplicateNotes,
   moveNotes,
+  pasteInsertionTick,
   pasteNotes,
   resizeNote,
   setTimeSignature,
@@ -14,7 +15,8 @@ import {
 import { defaultPreferences } from '@/state/prefs';
 import { createAppStore } from '@/state/store';
 import type { EditResult, Melody } from '@/domain/types';
-import { idGen, melodyWith, Q, S } from './helpers';
+import { checkInvariants } from '@/domain/invariants';
+import { E, idGen, melodyWith, Q, S } from './helpers';
 
 function ok(r: EditResult): Extract<EditResult, { ok: true }> {
   if (!r.ok) throw new Error(`expected ok, got ${r.reason}`);
@@ -203,24 +205,95 @@ describe('deleteNotes / pasteNotes', () => {
     expect(deleteNotes(m, [])).toEqual({ ok: false, reason: 'emptySelection' });
   });
 
-  it('pastes relative to the target tick and returns the new ids', () => {
-    const clip = [
-      { pitch: 72, offset: 0, duration: Q },
-      { pitch: 74, offset: Q, duration: Q },
-    ];
-    const r = ok(pasteNotes(m, clip, 4 * Q, S, { newId: idGen('p') }));
-    expect(r.melody.notes.slice(2)).toEqual([
-      { id: 'p1', pitch: 72, start: 4 * Q, duration: Q },
-      { id: 'p2', pitch: 74, start: 5 * Q, duration: Q },
-    ]);
+});
+
+describe('pasteNotes inserts and shifts later notes right', () => {
+  // C D [rest] E: a rest of one quarter between D and E.
+  const m = melodyWith([
+    { id: 'c', pitch: 72, start: 0, duration: Q },
+    { id: 'd', pitch: 74, start: Q, duration: Q, slurNext: true },
+    { id: 'e', pitch: 76, start: 3 * Q, duration: Q },
+  ]);
+  // Two eighths with an eighth rest between them: span 3 eighths.
+  const clip = [
+    { pitch: 79, offset: 0, duration: E },
+    { pitch: 81, offset: 2 * E, duration: E },
+  ];
+  const paste = (at: number) => ok(pasteNotes(m, clip, at, { newId: idGen('p') }));
+  const layout = (r: { melody: Melody }) => r.melody.notes.map((n) => [n.id, n.start]);
+
+  it('at the start: everything moves right by the pasted span', () => {
+    const r = paste(0);
+    expect(layout(r)).toEqual([['p1', 0], ['p2', 2 * E], ['c', 3 * E], ['d', 3 * E + Q], ['e', 3 * E + 3 * Q]]);
     expect(r.ids).toEqual(['p1', 'p2']);
   });
 
-  it('rejects a paste that lands on occupied time', () => {
-    expect(pasteNotes(m, [{ pitch: 72, offset: 0, duration: Q }], S, S, { newId: idGen() })).toMatchObject({
-      ok: false,
-      reason: 'noRoom',
-    });
+  it('between two notes: only the later notes move, and the rest after the paste is kept', () => {
+    expect(layout(paste(2 * Q))).toEqual([['c', 0], ['d', Q], ['p1', 2 * Q], ['p2', 2 * Q + 2 * E], ['e', 3 * Q + 3 * E]]);
+  });
+
+  it('after the last note: appends, nothing moves', () => {
+    expect(layout(paste(4 * Q))).toEqual([['c', 0], ['d', Q], ['e', 3 * Q], ['p1', 4 * Q], ['p2', 4 * Q + 2 * E]]);
+  });
+
+  it('a position inside a note moves to its nearest edge', () => {
+    expect(layout(paste(Q + E / 2))[1]).toEqual(['p1', Q]);
+    expect(layout(paste(2 * Q - E / 2))[2]).toEqual(['p1', 2 * Q]);
+  });
+
+  it('keeps marks and slurs between pasted notes; a slur across the insertion point is dropped', () => {
+    const marked = [
+      { pitch: 79, offset: 0, duration: Q, mark: 'tenuto' as const, slurNext: true as const },
+      { pitch: 81, offset: Q, duration: Q },
+    ];
+    const r = ok(pasteNotes(m, marked, 2 * Q, { newId: idGen('p') }));
+    expect(byId(r.melody, 'p1')).toMatchObject({ mark: 'tenuto', slurNext: true });
+    // d was slurred into e; with notes pasted between them the slur no longer applies.
+    expect('slurNext' in byId(r.melody, 'd')).toBe(false);
+    expect(checkInvariants(r.melody)).toEqual([]);
+  });
+
+  it('an empty clipboard is refused', () => {
+    expect(pasteNotes(m, [], 0, { newId: idGen() })).toEqual({ ok: false, reason: 'emptySelection' });
+  });
+});
+
+describe('pasteInsertionTick', () => {
+  const m = melodyWith([
+    { id: 'c', pitch: 72, start: 0, duration: Q },
+    { id: 'd', pitch: 74, start: Q, duration: Q },
+    { id: 'e', pitch: 76, start: 3 * Q, duration: Q },
+  ]);
+  it('pastes right after the last selected note', () => {
+    expect(pasteInsertionTick(m, new Set(['c', 'd']), 0, S)).toBe(2 * Q);
+    expect(pasteInsertionTick(m, new Set(['e', 'c']), 0, S)).toBe(4 * Q);
+  });
+  it('uses the playhead, snapped down to the grid, when nothing is selected', () => {
+    expect(pasteInsertionTick(m, new Set(), 0, S)).toBe(0);
+    expect(pasteInsertionTick(m, new Set(), 5 * Q + 50, S)).toBe(5 * Q);
+  });
+});
+
+describe('the store pastes after the selection', () => {
+  it('copy then paste duplicates the selection right after it, selected', () => {
+    const store = createAppStore(
+      defaultPreferences('en'),
+      { now: () => '2026-01-01T00:00:00.000Z', newId: idGen('s') },
+      melodyWith([
+        { id: 'c', pitch: 72, start: 0, duration: Q },
+        { id: 'd', pitch: 74, start: Q, duration: Q },
+      ]),
+    );
+    const { actions } = store.getState();
+    actions.select(['c']);
+    actions.copy();
+    actions.paste(0);
+    const notes = store.getState().melody.notes;
+    expect(notes.map((n) => [n.pitch, n.start])).toEqual([[72, 0], [72, Q], [74, 2 * Q]]);
+    expect([...store.getState().selection.ids]).toEqual([notes[1]?.id]);
+    // Pasting again chains after the new copy.
+    actions.paste(0);
+    expect(store.getState().melody.notes.map((n) => n.start)).toEqual([0, Q, 2 * Q, 3 * Q]);
   });
 });
 
@@ -256,7 +329,7 @@ describe('editing keeps articulation (002 FR-011)', () => {
       { pitch: 72, offset: 0, duration: Q, mark: 'tenuto' as const },
       { pitch: 74, offset: Q, duration: Q },
     ];
-    const r = ok(pasteNotes(marked(), clip, 8 * Q, S, { newId: idGen('p') }));
+    const r = ok(pasteNotes(marked(), clip, 8 * Q, { newId: idGen('p') }));
     expect(byId(r.melody, 'p1').mark).toBe('tenuto');
     expect('mark' in byId(r.melody, 'p2')).toBe(false);
   });

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { clickCell, MAX_PITCH, openFresh, ROW_HEIGHT } from './helpers';
+import { MAX_PITCH, ROW_HEIGHT, clickCell, openFresh, openTab } from './helpers';
 
 // quickstart.md scenario 2
 test('sheet music and fingerings follow the timeline on one time axis', async ({ page }) => {
@@ -34,6 +34,7 @@ test('sheet music and fingerings follow the timeline on one time axis', async ({
   await expect(rects.first()).toHaveAttribute('aria-selected', 'true');
 
   // Hide the sheet panel; reload keeps the layout.
+  await openTab(page, 'View');
   await page.getByRole('button', { name: 'Sheet music', exact: true }).click();
   await expect(page.getByTestId('panel-sheet')).toHaveCount(0);
   await page.reload();

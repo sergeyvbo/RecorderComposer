@@ -1,7 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
-import { clickCell, openFresh } from './helpers';
+import { clickCell, openFresh, openTab } from './helpers';
 
 /** Adjacent quarter notes from tick 0 (75 px each at the default zoom); keep to upper rows so they stay clickable. */
 async function addNotes(page: Page, pitches: number[]) {
@@ -27,6 +27,7 @@ const marksOf = (page: Page) => staffMarks(page).evaluateAll((els) => els.map((e
 
 async function exportNotes(page: Page, path: string) {
   const downloadPromise = page.waitForEvent('download');
+  await openTab(page, 'File');
   await page.getByRole('button', { name: 'Export file' }).click();
   const download = await downloadPromise;
   await download.saveAs(path);
@@ -104,6 +105,7 @@ test('cut and paste keeps marks and slurs; a duplicated melody keeps them too', 
 
   // Duplicate in the library and open the copy.
   await page.waitForTimeout(150);
+  await openTab(page, 'File');
   await page.getByRole('button', { name: 'Melodies…' }).click();
   await page.getByRole('button', { name: 'Duplicate' }).first().click();
   const copy = page.getByRole('listitem').filter({ hasText: '(copy)' });

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { openFresh } from './helpers';
+import { openFresh, openTab } from './helpers';
 
 const keyboardLabels = (page: import('@playwright/test').Page) =>
   page.locator('.keyboard text').allTextContents();
@@ -11,6 +11,7 @@ test('switching language and note naming updates labels and persists', async ({ 
   expect(labels.at(0)).toBe('D6');
   expect(labels.at(-1)).toBe('C4');
 
+  await openTab(page, 'View');
   await page.getByRole('combobox', { name: 'Language' }).selectOption('ru');
   await expect(page.getByRole('button', { name: 'Ноты' })).toBeVisible();
   await expect(page.locator('html')).toHaveAttribute('lang', 'ru');

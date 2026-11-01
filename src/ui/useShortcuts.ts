@@ -11,6 +11,10 @@ export interface ShortcutHandlers {
 const isTyping = (el: EventTarget | null) =>
   el instanceof HTMLElement && (el.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName));
 
+/** A focused button or tab activates natively on Space, so Space must not also play (003 FR-009). */
+const activatesOnSpace = (el: EventTarget | null) =>
+  el instanceof HTMLElement && (el.tagName === 'BUTTON' || el.getAttribute('role') === 'tab');
+
 /** Keyboard shortcuts from contracts/ui-contract.md. */
 export function useShortcuts(handlers: ShortcutHandlers = {}) {
   const store = useAppStore();
@@ -30,7 +34,10 @@ export function useShortcuts(handlers: ShortcutHandlers = {}) {
       if (mod && key === 'c') return handled(), actions.copy();
       if (mod && key === 'x') return handled(), actions.cut();
       if (mod && key === 'v') return handled(), actions.paste(playback.positionTicks);
-      if ((key === ' ' || e.code === 'Space') && onPlayPause) return handled(), onPlayPause();
+      if ((key === ' ' || e.code === 'Space') && onPlayPause) {
+        if (activatesOnSpace(e.target)) return;
+        return handled(), onPlayPause();
+      }
       if (key === 'Home' && onHome) return handled(), onHome();
       if (key === 'Escape') return actions.clearSelection();
       const plain = !mod && !e.altKey;

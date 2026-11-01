@@ -1,8 +1,5 @@
-import { useTranslation } from 'react-i18next';
-import { setKey } from '@/domain/commands';
 import { ALLOWED_KEYS } from '@/domain/keys';
 import type { Key } from '@/domain/types';
-import { useApp } from '../storeContext';
 import { useKeyName } from '../useKeyName';
 
 export const keyValue = (k: Key) => `${k.tonic}-${k.mode}`;
@@ -22,17 +19,5 @@ export function KeySelectInput({ value, onChange, label }: { value: Key; onChang
         </option>
       ))}
     </select>
-  );
-}
-
-export function KeySelect() {
-  const { t } = useTranslation();
-  const key = useApp((s) => s.melody.key);
-  const actions = useApp((s) => s.actions);
-  return (
-    <label>
-      {t('toolbar.key')}{' '}
-      <KeySelectInput label={t('toolbar.key')} value={key} onChange={(k) => actions.dispatch((m) => setKey(m, k))} />
-    </label>
   );
 }

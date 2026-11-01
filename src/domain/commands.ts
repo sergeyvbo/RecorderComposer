@@ -234,27 +234,37 @@ export function deleteNotes(m: Melody, ids: readonly string[]): EditResult {
   return keepSlurs(m, done({ ...m, notes }, []));
 }
 
-export function pasteNotes(
-  m: Melody,
-  clipboard: readonly ClipboardNote[],
-  atTick: number,
-  snap: SnapTicks,
-  deps: CommandDeps,
-): EditResult {
+/**
+ * Where Paste inserts: right after the last selected note, or, with nothing selected, at the
+ * playhead snapped down to the grid (pasteNotes moves a tick inside a note to its nearest edge).
+ */
+export function pasteInsertionTick(m: Melody, selected: ReadonlySet<string>, playheadTick: number, snap: SnapTicks): number {
+  const sel = m.notes.filter((n) => selected.has(n.id));
+  if (sel.length > 0) return Math.max(...sel.map(noteEnd));
+  return Math.max(0, floorTo(playheadTick, snap));
+}
+
+/**
+ * Inserts the clipboard at `atTick` and shifts every later note right by the pasted span, so the
+ * paste always fits and rests after it are kept. A tick inside a note moves to that note's nearer
+ * edge. Marks and the slurs between pasted notes are kept (002 FR-011); a slur across the insertion
+ * point no longer joins consecutive notes and is dropped by the reconciliation.
+ */
+export function pasteNotes(m: Melody, clipboard: readonly ClipboardNote[], atTick: number, deps: CommandDeps): EditResult {
   if (clipboard.length === 0) return fail('emptySelection');
-  const base = Math.max(0, floorTo(atTick, snap));
-  let current = m;
-  const adjusted: AdjustReason[] = [];
-  const ids: string[] = [];
-  for (const c of clipboard) {
-    const r = insertNote(current, { pitch: c.pitch, start: base + c.offset, duration: c.duration, snap: GRID_MIN as SnapTicks }, deps);
-    if (!r.ok) return fail('noRoom');
-    const articulation = { ...(c.mark ? { mark: c.mark } : {}), ...(c.slurNext ? { slurNext: c.slurNext } : {}) };
-    current = { ...r.melody, notes: r.melody.notes.map((n) => (r.ids?.includes(n.id) ? { ...n, ...articulation } : n)) };
-    adjusted.push(...(r.adjusted ?? []));
-    ids.push(...(r.ids ?? []));
-  }
-  return keepSlurs(m, done(current, adjusted, { ids }), ids);
+  let at = Math.max(0, atTick);
+  const inside = m.notes.find((n) => at > n.start && at < noteEnd(n));
+  if (inside) at = at - inside.start < noteEnd(inside) - at ? inside.start : noteEnd(inside);
+  const span = Math.max(...clipboard.map((c) => c.offset + c.duration));
+  const moved = m.notes.map((n) => (n.start >= at ? { ...n, start: n.start + span } : n));
+  const pasted = clipboard.map((c) => {
+    const n: Note = { id: deps.newId(), pitch: clampPitch(c.pitch), start: at + c.offset, duration: c.duration };
+    if (c.mark) n.mark = c.mark;
+    if (c.slurNext) n.slurNext = c.slurNext;
+    return n;
+  });
+  const ids = pasted.map((n) => n.id);
+  return keepSlurs(m, done(withNotes(m, [...moved, ...pasted]), [], { ids }), ids);
 }
 
 export function setTempo(m: Melody, bpm: number): EditResult {

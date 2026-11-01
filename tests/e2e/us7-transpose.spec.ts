@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { clickCell, openFresh } from './helpers';
+import { clickCell, openFresh, openTab } from './helpers';
 
 // quickstart.md scenario 7
 test('key signature and transposition with out-of-range handling', async ({ page }) => {
@@ -7,6 +7,7 @@ test('key signature and transposition with out-of-range handling', async ({ page
   await clickCell(page, 82, 5); // B♭ (written B♭4)
   await clickCell(page, 98, 80); // D7, top of the range
 
+  await openTab(page, 'Melody');
   await page.getByRole('combobox', { name: 'Key' }).selectOption('F-major');
   await expect(page.getByTestId('note').first()).toHaveAttribute('aria-label', 'B♭4');
 

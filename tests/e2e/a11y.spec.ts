@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
-import { clickCell, openFresh } from './helpers';
+import { clickCell, openFresh, openTab } from './helpers';
 
 for (const lang of ['en', 'ru'] as const) {
   test(`no serious accessibility violations (${lang})`, async ({ page }) => {
@@ -12,16 +12,24 @@ for (const lang of ['en', 'ru'] as const) {
   });
 }
 
-test('every toolbar control is keyboard-reachable and named', async ({ page }) => {
+test('every title bar and ribbon control is keyboard-reachable and named', async ({ page }) => {
   await openFresh(page);
-  const unnamed = await page.locator('header button, header select, header input').evaluateAll((els) =>
-    els
-      .filter((el) => !(el as HTMLElement).hidden && (el as HTMLInputElement).type !== 'file')
-      .filter((el) => {
-        const name = el.getAttribute('aria-label') ?? el.textContent ?? '';
-        return name.trim() === '' || (el as HTMLElement).tabIndex < 0;
-      })
-      .map((el) => el.outerHTML.slice(0, 80)),
-  );
-  expect(unnamed).toEqual([]);
+  for (const tab of ['Home', 'Melody', 'File', 'View']) {
+    await openTab(page, tab);
+    const controls = page.locator(
+      '.titlebar :is(button, select, input), [role="tabpanel"]:not([hidden]) :is(button, select, input)',
+    );
+    const unnamed = await controls.evaluateAll((els) =>
+      els
+        .filter((el) => (el as HTMLInputElement).type !== 'file')
+        .filter((el) => {
+          const name = el.getAttribute('aria-label') ?? el.textContent ?? '';
+          // Disabled controls are skipped by Tab by design; they must still be named.
+          const reachable = (el as HTMLButtonElement).disabled || (el as HTMLElement).tabIndex >= 0;
+          return name.trim() === '' || !reachable;
+        })
+        .map((el) => el.outerHTML.slice(0, 80)),
+    );
+    expect(unnamed, tab).toEqual([]);
+  }
 });

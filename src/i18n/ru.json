@@ -160,5 +160,52 @@
   "dialog": {
     "ok": "ОК",
     "cancel": "Отмена"
+  },
+  "ribbon": {
+    "label": "Лента",
+    "quickAccess": "Панель быстрого доступа",
+    "collapse": "Свернуть ленту",
+    "pin": "Закрепить ленту",
+    "tab": {
+      "home": "Главная",
+      "melody": "Мелодия",
+      "file": "Файл",
+      "view": "Вид"
+    },
+    "group": {
+      "clipboard": "Буфер обмена",
+      "history": "История",
+      "playback": "Воспроизведение",
+      "articulation": "Артикуляция",
+      "properties": "Свойства",
+      "transform": "Преобразование",
+      "melodies": "Мелодии",
+      "export": "Экспорт",
+      "print": "Печать",
+      "panels": "Панели",
+      "zoom": "Масштаб",
+      "grid": "Сетка",
+      "language": "Язык"
+    },
+    "cmd": {
+      "paste": "Вставить",
+      "cut": "Вырезать",
+      "copy": "Копировать",
+      "delete": "Удалить",
+      "staccato": "Стаккато",
+      "tenuto": "Тенуто",
+      "legato": "Легато"
+    },
+    "reason": {
+      "noSelection": "Сначала выделите ноты",
+      "clipboardEmpty": "Ещё ничего не скопировано",
+      "nothingToUndo": "Нечего отменять",
+      "nothingToRedo": "Нечего повторять",
+      "lastPanel": "Хотя бы одна панель остаётся видимой",
+      "legatoUnavailable": "Выделите ноты подряд"
+    },
+    "key": {
+      "wheel": "колесо"
+    }
   }
 }

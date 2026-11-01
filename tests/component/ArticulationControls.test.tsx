@@ -1,11 +1,11 @@
 import { act, fireEvent, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { ArticulationControls } from '@/ui/Toolbar/ArticulationControls';
+import { Ribbon } from '@/ui/Ribbon/Ribbon';
 import { EditHint } from '@/ui/Toolbar/EditHint';
 import { TitleInput } from '@/ui/Toolbar/TitleInput';
 import { useShortcuts } from '@/ui/useShortcuts';
 import { melodyWith, Q } from '../unit/domain/helpers';
-import { setup } from './renderApp';
+import { setupRibbon } from './renderApp';
 
 function Shortcuts() {
   useShortcuts();
@@ -13,14 +13,13 @@ function Shortcuts() {
 }
 
 function renderControls() {
-  const utils = setup(
+  const utils = setupRibbon(
     <>
       <TitleInput />
-      <ArticulationControls />
+      <Ribbon />
       <EditHint />
       <Shortcuts />
     </>,
-    { withAxis: false },
   );
   const notes = ['a', 'b', 'c', 'd'].map((id, i) => ({ id, pitch: 72 + i, start: i * Q, duration: Q }));
   act(() => utils.store.getState().actions.openMelody(melodyWith(notes)));
@@ -32,7 +31,7 @@ function renderControls() {
 const staccato = () => screen.getByRole('button', { name: 'Staccato (S)' });
 const tenuto = () => screen.getByRole('button', { name: 'Tenuto (T)' });
 
-describe('ArticulationControls: staccato and tenuto (US1)', () => {
+describe('Ribbon articulation commands: staccato and tenuto (US1)', () => {
   it('disables the mark buttons with no selection', () => {
     renderControls();
     expect(staccato()).toBeDisabled();
@@ -111,7 +110,7 @@ describe('ArticulationControls: staccato and tenuto (US1)', () => {
 
 const legato = () => screen.getByRole('button', { name: 'Legato (L, Shift+L to remove)' });
 
-describe('ArticulationControls: legato (US2)', () => {
+describe('Ribbon articulation commands: legato (US2)', () => {
   const links = (store: ReturnType<typeof renderControls>['store']) =>
     store.getState().melody.notes.filter((n) => n.slurNext).map((n) => n.id);
 

@@ -1,5 +1,5 @@
 import { createStore, type StoreApi } from 'zustand/vanilla';
-import { deleteNotes, pasteNotes, type ClipboardNote } from '@/domain/commands';
+import { deleteNotes, pasteInsertionTick, pasteNotes, type ClipboardNote } from '@/domain/commands';
 import { apply, canRedo, canUndo, createHistory, redo, undo, type History } from '@/domain/history';
 import {
   createEmptyMelody,
@@ -64,7 +64,8 @@ export interface AppActions {
   setHover: (id: string | null) => void;
   copy: () => void;
   cut: () => void;
-  paste: (atTick: number) => void;
+  /** Inserts the clipboard after the selection, or at the playhead with nothing selected. */
+  paste: (playheadTick: number) => void;
   openMelody: (m: Melody) => void;
   setPrefs: (patch: Partial<Preferences>) => void;
   setView: (patch: Partial<ViewState>) => void;
@@ -205,10 +206,11 @@ export function createAppStore(initialPrefs: Preferences, deps: StoreDeps = defa
           const ids = [...get().selection.ids];
           get().actions.dispatch((m) => deleteNotes(m, ids));
         },
-        paste: (atTick) => {
+        paste: (playheadTick) => {
           const { clipboard, prefs } = get();
           if (clipboard.length === 0) return get().actions.notify('clipboardEmpty');
-          const r = get().actions.dispatch((m) => pasteNotes(m, clipboard, atTick, prefs.snapTicks, deps));
+          const at = pasteInsertionTick(get().melody, get().selection.ids, playheadTick, prefs.snapTicks);
+          const r = get().actions.dispatch((m) => pasteNotes(m, clipboard, at, deps));
           if (r.ok && r.ids) get().actions.select(r.ids);
         },
         openMelody: (m) =>

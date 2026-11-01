@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { clickCell, openFresh } from './helpers';
+import { clickCell, openFresh, quickAccess, tabPanel } from './helpers';
 
 // quickstart.md scenario 3 (audio output itself is not asserted)
 test('playback moves one playhead across panels and highlights the playing note', async ({ page }) => {
@@ -15,7 +15,8 @@ test('playback moves one playhead across panels and highlights the playing note'
     test.skip(true, 'no Web Audio in this browser build');
   }
   await page.keyboard.press('Space');
-  await expect(page.getByRole('button', { name: 'Pause' })).toBeVisible();
+  await expect(quickAccess(page).getByRole('button', { name: 'Pause' })).toBeVisible();
+  await expect(tabPanel(page).getByRole('button', { name: 'Pause' })).toBeVisible();
   await page.waitForTimeout(1500);
   const x1 = (await playhead.boundingBox())!.x;
   await expect(page.getByTestId('note').nth(1)).toHaveAttribute('data-playing', 'true');

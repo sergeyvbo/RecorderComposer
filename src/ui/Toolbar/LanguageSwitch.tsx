@@ -23,20 +23,17 @@ export function LanguageSwitch() {
   const language = useApp((s) => s.prefs.language);
   const actions = useApp((s) => s.actions);
   return (
-    <label>
-      <span className="sr-only">{t('toolbar.language')}</span>
-      <select
-        aria-label={t('toolbar.language')}
-        value={language}
-        onChange={(e) => actions.setPrefs({ language: e.target.value as (typeof LANGUAGES)[number] })}
-      >
-        {LANGUAGES.map((l) => (
-          <option key={l} value={l}>
-            {t(`lang.${l}`)}
-          </option>
-        ))}
-      </select>
-    </label>
+    <select
+      aria-label={t('toolbar.language')}
+      value={language}
+      onChange={(e) => actions.setPrefs({ language: e.target.value as (typeof LANGUAGES)[number] })}
+    >
+      {LANGUAGES.map((l) => (
+        <option key={l} value={l}>
+          {t(`lang.${l}`)}
+        </option>
+      ))}
+    </select>
   );
 }
 
@@ -46,16 +43,13 @@ export function NamingSwitch() {
   const naming = useApp((s) => s.prefs.noteNaming);
   const actions = useApp((s) => s.actions);
   return (
-    <label>
-      <span className="sr-only">{t('toolbar.naming')}</span>
-      <select
-        aria-label={t('toolbar.naming')}
-        value={naming}
-        onChange={(e) => actions.setPrefs({ noteNaming: e.target.value as NamingStyle })}
-      >
-        <option value="letter">{t('naming.letter')}</option>
-        <option value="solfege">{t('naming.solfege')}</option>
-      </select>
-    </label>
+    <select
+      aria-label={t('toolbar.naming')}
+      value={naming}
+      onChange={(e) => actions.setPrefs({ noteNaming: e.target.value as NamingStyle })}
+    >
+      <option value="letter">{t('naming.letter')}</option>
+      <option value="solfege">{t('naming.solfege')}</option>
+    </select>
   );
 }

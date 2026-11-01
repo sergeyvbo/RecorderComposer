@@ -4,6 +4,7 @@ import {
   MAX_PX_PER_TICK,
   MIN_PX_PER_TICK,
   PANEL_IDS,
+  RIBBON_TABS,
   type Language,
   type Preferences,
 } from '@/state/prefs';
@@ -56,6 +57,10 @@ export function loadPreferences(browserLanguage: Language): Preferences {
         ? r.pxPerTick
         : base.pxPerTick,
     lastMelodyId: typeof r.lastMelodyId === 'string' ? r.lastMelodyId : null,
+    ribbon: {
+      tab: RIBBON_TABS.includes(r.ribbon?.tab as never) ? (r.ribbon?.tab as Preferences['ribbon']['tab']) : base.ribbon.tab,
+      collapsed: typeof r.ribbon?.collapsed === 'boolean' ? r.ribbon.collapsed : base.ribbon.collapsed,
+    },
   };
 }
 

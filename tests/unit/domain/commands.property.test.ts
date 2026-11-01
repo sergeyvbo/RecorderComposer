@@ -1,6 +1,6 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import { addNote, deleteNotes, duplicateNotes, moveNotes, pasteNotes, resizeNote } from '@/domain/commands';
+import { addNote, deleteNotes, duplicateNotes, moveNotes, pasteInsertionTick, pasteNotes, resizeNote } from '@/domain/commands';
 import { checkInvariants } from '@/domain/invariants';
 import { createEmptyMelody, SNAP_VALUES, type Melody } from '@/domain/types';
 
@@ -50,7 +50,7 @@ function run(ops: Op[]): Melody {
         const sel = m.notes.filter((n) => ids(o.pick).includes(n.id));
         const first = sel[0]?.start ?? 0;
         const clip = sel.map((n) => ({ pitch: n.pitch, offset: n.start - first, duration: n.duration }));
-        r = pasteNotes(m, clip, o.at, o.snap as never, deps);
+        r = pasteNotes(m, clip, pasteInsertionTick(m, new Set(ids(o.pick)), o.at, o.snap as never), deps);
         break;
       }
     }

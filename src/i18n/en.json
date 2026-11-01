@@ -158,5 +158,52 @@
   "dialog": {
     "ok": "OK",
     "cancel": "Cancel"
+  },
+  "ribbon": {
+    "label": "Ribbon",
+    "quickAccess": "Quick access",
+    "collapse": "Collapse the ribbon",
+    "pin": "Pin the ribbon",
+    "tab": {
+      "home": "Home",
+      "melody": "Melody",
+      "file": "File",
+      "view": "View"
+    },
+    "group": {
+      "clipboard": "Clipboard",
+      "history": "History",
+      "playback": "Playback",
+      "articulation": "Articulation",
+      "properties": "Properties",
+      "transform": "Transform",
+      "melodies": "Melodies",
+      "export": "Export",
+      "print": "Print",
+      "panels": "Panels",
+      "zoom": "Zoom",
+      "grid": "Grid",
+      "language": "Language"
+    },
+    "cmd": {
+      "paste": "Paste",
+      "cut": "Cut",
+      "copy": "Copy",
+      "delete": "Delete",
+      "staccato": "Staccato",
+      "tenuto": "Tenuto",
+      "legato": "Legato"
+    },
+    "reason": {
+      "noSelection": "Select notes first",
+      "clipboardEmpty": "Nothing has been copied yet",
+      "nothingToUndo": "Nothing to undo",
+      "nothingToRedo": "Nothing to redo",
+      "lastPanel": "At least one panel stays visible",
+      "legatoUnavailable": "Select consecutive notes"
+    },
+    "key": {
+      "wheel": "wheel"
+    }
   }
 }

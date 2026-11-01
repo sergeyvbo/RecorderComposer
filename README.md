@@ -10,7 +10,8 @@ them. Runs entirely in the browser — no server, no account.
 ## Features
 
 - **Timeline editor** — click to add notes, drag to move, Ctrl/Cmd-drag to copy, drag edges to
-  stretch, box/Ctrl/Shift selection, copy/cut/paste, undo/redo (200 steps), snap 1/4…1/32.
+  stretch, box/Ctrl/Shift selection, copy/cut/paste (paste inserts after the selection, or at the
+  playhead when nothing is selected, pushing later notes right), undo/redo (200 steps), snap 1/4…1/32.
   Melodies are always single-voice and inside the recorder range: a dragged note (or copy) jumps
   into free space or stops at its neighbour.
 - **Sheet music** in treble clef (written an octave below sounding pitch, clef marked 8) and a
@@ -28,6 +29,11 @@ them. Runs entirely in the browser — no server, no account.
 - **Articulations**: staccato (`S`), tenuto (`T`) and legato slurs (`L` to apply, `Shift+L` to
   remove), from the toolbar or the keyboard. They are drawn in standard notation on screen and in
   print, marked on the timeline, heard on playback, and staccato is shortened in MIDI export.
+- **Office-style ribbon**: Home, Melody, File and View tabs with icon commands and tooltips
+  (name, shortcut, and why a command is unavailable); Cut, Copy, Paste and Delete buttons; a title
+  bar with the melody title, quick-access Undo, Redo and Play, and the save status. Double-click a
+  tab to collapse the ribbon to its tabs; narrow windows fold groups into drop-downs. Fully
+  keyboard-accessible (arrow keys between tabs).
 - **Clear refusals**: whenever an action is impossible (nothing selected, no room, legato over a
   selection with gaps, nothing to undo…), a short message says why.
 
@@ -61,7 +67,8 @@ Every push to `master` is checked and deployed to GitHub Pages by
 `src/ui`, `src/audio` (Tone.js), `src/persistence` (IndexedDB, preferences) ← `src/bootstrap.ts` /
 `src/main.tsx`. Lint rules enforce the layering. Design documents:
 [`specs/001-recorder-composer/`](specs/001-recorder-composer/),
-[`specs/002-note-articulations/`](specs/002-note-articulations/); project principles:
+[`specs/002-note-articulations/`](specs/002-note-articulations/),
+[`specs/003-ribbon-toolbar/`](specs/003-ribbon-toolbar/); project principles:
 [`.specify/memory/constitution.md`](.specify/memory/constitution.md).
 
 ## Melody files
@@ -74,3 +81,6 @@ what is stored in the browser. Version 1 files still open, with every note plain
 ## Licenses
 
 Music glyphs: Bravura font, SIL Open Font License 1.1 (`public/fonts/OFL.txt`).
+
+Icons: [Lucide](https://lucide.dev), ISC License
+([`public/licenses/lucide-LICENSE.txt`](public/licenses/lucide-LICENSE.txt)).
