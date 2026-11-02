@@ -3,10 +3,13 @@ import { labelColor, pitchColor } from '@/domain/colors';
 import { MAX_PITCH, type Note } from '@/domain/types';
 
 export const HANDLE = 6;
+/** Width of the visible length grip on a note's right end; it is also the end handle's hit area. */
+export const GRIP = 8;
 
 /**
  * A note as a colored rectangle with left/right resize handles, plus a staccato dot or tenuto bar
- * at its right end (002 FR-009). `description` (translated articulation) extends the accessible name.
+ * near its right end (002 FR-009). The right handle is drawn as a grip so the length is easy to
+ * adjust. `description` (translated articulation) extends the accessible name.
  */
 export const NoteRect = memo(function NoteRect({
   note,
@@ -32,9 +35,13 @@ export const NoteRect = memo(function NoteRect({
   const y = (MAX_PITCH - note.pitch) * rowHeight + 1;
   const h = rowHeight - 2;
   const w = Math.max(2, width - 1);
-  const handle = Math.min(HANDLE, w / 3);
+  const handle = Math.min(HANDLE, w / 4);
+  const grip = Math.min(GRIP, w / 3);
   const ink = labelColor(pitchColor(note.pitch));
-  const markX = x + w - Math.max(5, handle);
+  const markX = x + w - grip - 5;
+  const r = Math.min(3, grip);
+  const gx = x + w - grip;
+  const gripPath = `M${gx},${y}H${x + w - r}A${r},${r} 0 0 1 ${x + w},${y + r}V${y + h - r}A${r},${r} 0 0 1 ${x + w - r},${y + h}H${gx}Z`;
   return (
     <g
       data-note-id={note.id}
@@ -83,8 +90,25 @@ export const NoteRect = memo(function NoteRect({
           pointerEvents="none"
         />
       )}
+      <path
+        data-testid="note-grip"
+        d={gripPath}
+        fill={selected || hovered ? 'rgb(0 0 0 / 32%)' : 'rgb(0 0 0 / 16%)'}
+        aria-hidden
+        pointerEvents="none"
+      />
+      {grip >= 6 && h >= 8 && (
+        <path
+          d={`M${gx + grip / 2 - 1.5},${y + h / 2 - 3}v6M${gx + grip / 2 + 1.5},${y + h / 2 - 3}v6`}
+          stroke={ink}
+          strokeOpacity={0.7}
+          strokeWidth={1}
+          aria-hidden
+          pointerEvents="none"
+        />
+      )}
       <rect data-handle="start" x={x} y={y} width={handle} height={h} fill="transparent" style={{ cursor: 'ew-resize' }} />
-      <rect data-handle="end" x={x + w - handle} y={y} width={handle} height={h} fill="transparent" style={{ cursor: 'ew-resize' }} />
+      <rect data-handle="end" x={gx} y={y} width={grip} height={h} fill="transparent" style={{ cursor: 'ew-resize' }} />
     </g>
   );
 });

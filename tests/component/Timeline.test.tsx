@@ -122,3 +122,23 @@ describe('Timeline articulation (002 FR-009, FR-019)', () => {
     expect(labels[2]).not.toMatch(/,/);
   });
 });
+
+describe('Timeline length grip', () => {
+  const rowY = (p: number) => (98 - p) * ROW_HEIGHT + ROW_HEIGHT / 2;
+  const opts = { button: 0, buttons: 1, pointerType: 'mouse' };
+
+  it('draws a grip on the right end of every note; dragging it changes the length only', () => {
+    const { store, container } = setup(<TimelinePanel />);
+    act(() => store.getState().actions.openMelody(melodyWith([{ id: 'a', pitch: 80, start: 0, duration: 480 }])));
+    expect(screen.getAllByTestId('note-grip')).toHaveLength(1);
+    const grip = container.querySelector('[data-handle="end"]') as SVGRectElement;
+    // 480 ticks = 75 px wide; the grip covers its last 8 px.
+    expect(Number(grip.getAttribute('width'))).toBe(8);
+
+    const grid = screen.getByTestId('timeline-grid');
+    fireEvent.pointerDown(grip, { ...opts, clientX: 72, clientY: rowY(80) });
+    fireEvent.pointerMove(grid, { ...opts, clientX: 72 + 75, clientY: rowY(83) });
+    fireEvent.pointerUp(grid, { ...opts, clientX: 72 + 75, clientY: rowY(83) });
+    expect(store.getState().melody.notes.map((n) => [n.pitch, n.start, n.duration])).toEqual([[80, 0, 960]]);
+  });
+});
